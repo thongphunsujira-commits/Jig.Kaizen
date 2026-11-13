@@ -30,7 +30,7 @@
     #error-msg { color: #d9534f; font-size: 14px; margin-top: 10px; display: none; }
 
     /* หน้าจอหลักแสดงรายการจิ๊ก */
-    #main-screen { display: none; padding: 20px; max-width: 1100px; margin: auto; }
+    #main-screen { display: none; padding: 20px; max-width: 1200px; margin: auto; }
     .header {
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: white;
@@ -58,53 +58,31 @@
     .cat-btn:hover { background: #f1f5f9; }
     .cat-btn.active { background: #2563eb; color: white; border-color: #2563eb; font-weight: 500; }
 
-    /* ตารางรูปภาพจิ๊ก (Grid) */
+    /* ตารางแสดงข้อมูลจิ๊กแบบโชว์ครบทั้งหมด */
     .jig-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
     .jig-card {
       background: white; border-radius: 8px; overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #eee;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eee;
+      display: flex; flex-direction: column; justify-content: space-between;
     }
-    .jig-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
-    .jig-card img { width: 100%; height: 160px; object-fit: cover; background: #f8f9fa; }
-    .jig-card-body { padding: 12px; text-align: center; }
-    .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; }
-    .jig-name { font-size: 14px; color: #555; margin-top: 4px; }
+    .jig-card img { width: 100%; height: 160px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .jig-card-body { padding: 15px; flex-grow: 1; }
+    .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; margin-bottom: 4px; }
+    .jig-name { font-size: 15px; color: #333; font-weight: 600; margin-bottom: 10px; }
+    
+    .info-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .info-table td { padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
+    .info-label { font-weight: bold; color: #64748b; width: 40%; }
+    
     .jig-cat-tag {
       font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px;
-      border-radius: 10px; display: inline-block; margin-top: 6px;
+      border-radius: 10px; display: inline-block; margin-bottom: 8px;
     }
-
-    /* หน้าต่างป๊อปอัปแสดงข้อมูลจิ๊กเมื่อคลิกที่รูป */
-    .modal {
-      display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-      width: 100%; height: 100%; background-color: rgba(0,0,0,0.6);
-      justify-content: center; align-items: center; padding: 15px;
-    }
-    .modal-content {
-      background: white; border-radius: 10px; max-width: 500px; width: 100%;
-      overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.25); animation: fadeIn 0.2s;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    .modal-header {
-      background: #2c3e50; color: white; padding: 15px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .modal-header h3 { margin: 0; font-size: 18px; }
-    .close-btn { font-size: 24px; cursor: pointer; color: white; border: none; background: none; }
-    .modal-body { padding: 20px; }
-    .modal-body img {
-      width: 100%; max-height: 250px; object-fit: contain;
-      background: #f8f9fa; border-radius: 6px; margin-bottom: 15px; border: 1px solid #eee;
-    }
-    .info-table { width: 100%; border-collapse: collapse; }
-    .info-table td { padding: 8px 5px; border-bottom: 1px solid #eee; font-size: 15px; }
-    .info-label { font-weight: bold; color: #555; width: 35%; }
     .status-badge {
-      padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold;
+      padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;
       background: #d4edda; color: #155724; display: inline-block;
     }
   </style>
@@ -122,7 +100,7 @@
     </div>
   </div>
 
-  <!-- 2. หน้าแสดงรูปภาพจิ๊กและหมวดหมู่ -->
+  <!-- 2. หน้าแสดงรายการจิ๊กและข้อมูลทั้งหมด -->
   <div id="main-screen">
     <div class="header">
       <h1>รายการจิ๊ก (Jig Catalog)</h1>
@@ -133,51 +111,21 @@
     </div>
 
     <!-- แถบปุ่มหมวดหมู่จิ๊ก -->
-    <div class="category-bar" id="category-bar">
-      <!-- ปุ่มหมวดหมู่จะถูกสร้างอัตโนมัติ -->
-    </div>
+    <div class="category-bar" id="category-bar"></div>
 
-    <div class="jig-grid" id="jig-container">
-      <!-- รูปภาพจิ๊กจะถูกสร้างอัตโนมัติจากข้อมูลด้านล่าง -->
-    </div>
-  </div>
-
-  <!-- 3. หน้าต่างแสดงรายละเอียดเมื่อกดที่รูป -->
-  <div id="detail-modal" class="modal" onclick="closeModalOutside(event)">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modal-title">รายละเอียดจิ๊ก</h3>
-        <button class="close-btn" onclick="closeModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <img id="modal-img" src="" alt="รูปภาพจิ๊ก">
-        <table class="info-table">
-          <tr><td class="info-label">รหัสจิ๊ก (Jig ID):</td><td id="modal-code"></td></tr>
-          <tr><td class="info-label">ชื่อจิ๊ก:</td><td id="modal-name"></td></tr>
-          <tr><td class="info-label">ประเภท/หมวดหมู่:</td><td id="modal-category"></td></tr>
-          <tr><td class="info-label">เครื่องจักร / ไลน์:</td><td id="modal-machine"></td></tr>
-          <tr><td class="info-label">ตำแหน่งจัดเก็บ:</td><td id="modal-location"></td></tr>
-          <tr><td class="info-label">สถานะ:</td><td><span class="status-badge" id="modal-status"></span></td></tr>
-          <tr><td class="info-label">หมายเหตุ:</td><td id="modal-note"></td></tr>
-        </table>
-      </div>
-    </div>
+    <!-- ตารางแสดงข้อมูลจิ๊กแบบโชว์ครบทุกตัว -->
+    <div class="jig-grid" id="jig-container"></div>
   </div>
 
   <script>
-    // ==========================================
-    // รหัสผ่านเข้าเว็บไซต์
-    // ==========================================
     const SYSTEM_PASSWORD = "1234";
 
-    // ==========================================
-    // ข้อมูลจิ๊ก (สามารถเพิ่ม/แก้ไขหมวดหมู่ตรง category ได้เลยค่ะ)
-    // ==========================================
+    // พื้นที่ใส่ข้อมูลจิ๊ก (สามารถเพิ่ม/แก้ไขข้อมูลตรงนี้ได้เลยค่ะ)
     const jigsData = [
       {
         code: "JIG-001",
         name: "Jig Assembly Housing A",
-        category: "Line 1", // หมวดหมู่จิ๊ก
+        category: "Line 1",
         machine: "MC01",
         location: "Shelf A-01",
         status: "พร้อมใช้งาน (Active)",
@@ -241,7 +189,6 @@
       document.getElementById("login-screen").style.display = "flex";
     }
 
-    // สร้างปุ่มหมวดหมู่ด้านบนอัตโนมัติ
     function renderCategories() {
       const categories = ["ทั้งหมด", ...new Set(jigsData.map(j => j.category))];
       const bar = document.getElementById("category-bar");
@@ -259,7 +206,7 @@
       });
     }
 
-    // สร้างการ์ดรูปภาพจิ๊ก
+    // สร้างการ์ดแสดงข้อมูลจิ๊กแบบโชว์ครบทุกช่องโดยไม่ต้องกดคลิก
     function renderJigs(data) {
       const container = document.getElementById("jig-container");
       container.innerHTML = "";
@@ -270,20 +217,26 @@
       data.forEach((jig) => {
         const card = document.createElement("div");
         card.className = "jig-card";
-        card.onclick = () => openModal(jig);
         card.innerHTML = `
-          <img src="${jig.image}" alt="${jig.code}">
-          <div class="jig-card-body">
-            <div class="jig-code">${jig.code}</div>
-            <div class="jig-name">${jig.name}</div>
-            <span class="jig-cat-tag">${jig.category}</span>
+          <div>
+            <img src="${jig.image}" alt="${jig.code}">
+            <div class="jig-card-body">
+              <span class="jig-cat-tag">${jig.category}</span>
+              <div class="jig-code">${jig.code}</div>
+              <div class="jig-name">${jig.name}</div>
+              <table class="info-table">
+                <tr><td class="info-label">เครื่องจักร:</td><td>${jig.machine}</td></tr>
+                <tr><td class="info-label">ตำแหน่ง:</td><td>${jig.location}</td></tr>
+                <tr><td class="info-label">สถานะ:</td><td><span class="status-badge">${jig.status}</span></td></tr>
+                <tr><td class="info-label">หมายเหตุ:</td><td>${jig.note}</td></tr>
+              </table>
+            </div>
           </div>
         `;
         container.appendChild(card);
       });
     }
 
-    // กรองและค้นหาจิ๊ก
     function filterJigs() {
       const keyword = document.getElementById("search-input").value.toLowerCase();
       const filtered = jigsData.filter(jig => {
@@ -298,28 +251,6 @@
         return matchCategory && matchKeyword;
       });
       renderJigs(filtered);
-    }
-
-    // เปิดป๊อปอัปแสดงข้อมูลจิ๊ก
-    function openModal(jig) {
-      document.getElementById("modal-title").innerText = "ข้อมูลจิ๊ก: " + jig.code;
-      document.getElementById("modal-img").src = jig.image;
-      document.getElementById("modal-code").innerText = jig.code;
-      document.getElementById("modal-name").innerText = jig.name;
-      document.getElementById("modal-category").innerText = jig.category;
-      document.getElementById("modal-machine").innerText = jig.machine;
-      document.getElementById("modal-location").innerText = jig.location;
-      document.getElementById("modal-status").innerText = jig.status;
-      document.getElementById("modal-note").innerText = jig.note;
-      document.getElementById("detail-modal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("detail-modal").style.display = "none";
-    }
-
-    function closeModalOutside(e) {
-      if (e.target.id === "detail-modal") closeModal();
     }
   </script>
 </body>
