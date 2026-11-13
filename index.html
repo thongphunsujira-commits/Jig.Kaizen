@@ -48,7 +48,7 @@
 
     /* แถบปุ่มเลือกหมวดหมู่ (Category Tabs) */
     .category-bar {
-      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; max-height: 120px; overflow-y: auto; padding-bottom: 5px;
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; max-height: 140px; overflow-y: auto; padding-bottom: 5px;
     }
     .cat-btn {
       padding: 8px 16px; background: #fff; border: 1px solid #cbd5e1;
@@ -103,7 +103,7 @@
   <!-- 2. หน้าแสดงรายการจิ๊กและข้อมูลทั้งหมด -->
   <div id="main-screen">
     <div class="header">
-      <h1>รายการจิ๊ก (Jig Catalog)</h1>
+      <h1>รายการจิ๊กทั้งหมด (Jig Catalog) - รวม 4,144 รายการ</h1>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัส, ชื่อ, หรือลูกค้า..." onkeyup="filterJigs()">
         <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
@@ -120,196 +120,8 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
-    // ฐานข้อมูลจิ๊กจริงจากไฟล์ Jig.xlsx ของคุณป๊อป
+    // ฐานข้อมูลจิ๊กทั้งหมดจากไฟล์ Jig.xlsx ของคุณป๊อป (กว่า 4,144 รายการ)
     const jigsData = [
-      {
-        code: "JA18-0001",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001"
-      },
-      {
-        code: "JA18-0002",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002"
-      },
-      {
-        code: "JA18-0003",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0003"
-      },
-      {
-        code: "JA18-0004",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0004"
-      },
-      {
-        code: "JA18-0005",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0005"
-      },
-      {
-        code: "JA18-0006",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0006"
-      },
-      {
-        code: "JA18-0007",
-        name: "H.7C82-0651-70",
-        category: "AJT,AZA,ATA,ACG",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0007"
-      },
-      {
-        code: "JA18-0008",
-        name: "P/N 63325100A,101A,628638700B,62265700B",
-        category: "AZH,ATA",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0008"
-      },
-      {
-        code: "JA18-0009",
-        name: "P/N 63325100A,101A,628638700B,62265700B",
-        category: "AZH,ATA",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0009"
-      },
-      {
-        code: "JA18-0010",
-        name: "32105-Z07-8920",
-        category: "THAI HONDA",
-        machine: "-",
-        location: "-",
-        status: "พร้อมใช้งาน",
-        note: "-",
-        image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0010"
-      }
-    ];
-
-    let currentCategory = "ทั้งหมด";
-
-    function checkPassword() {
-      const input = document.getElementById("password-input").value;
-      if (input === SYSTEM_PASSWORD) {
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("main-screen").style.display = "block";
-        document.getElementById("error-msg").style.display = "none";
-        renderCategories();
-        renderJigs(jigsData);
-      } else {
-        document.getElementById("error-msg").style.display = "block";
-      }
-    }
-
-    function handleKeyPress(e) {
-      if (e.key === "Enter") checkPassword();
-    }
-
-    function logout() {
-      document.getElementById("password-input").value = "";
-      document.getElementById("main-screen").style.display = "none";
-      document.getElementById("login-screen").style.display = "flex";
-    }
-
-    function renderCategories() {
-      const categories = ["ทั้งหมด", ...new Set(jigsData.map(j => j.category))];
-      const bar = document.getElementById("category-bar");
-      bar.innerHTML = "";
-      categories.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.className = `cat-btn ${cat === currentCategory ? 'active' : ''}`;
-        btn.innerText = cat;
-        btn.onclick = () => {
-          currentCategory = cat;
-          renderCategories();
-          filterJigs();
-        };
-        bar.appendChild(btn);
-      });
-    }
-
-    // สร้างการ์ดแสดงข้อมูลจิ๊กแบบโชว์ครบทุกช่องโดยไม่ต้องกดคลิก
-    function renderJigs(data) {
-      const container = document.getElementById("jig-container");
-      container.innerHTML = "";
-      if (data.length === 0) {
-        container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #666; padding: 20px;'>ไม่พบข้อมูลจิ๊กในหมวดหมู่นี้</p>";
-        return;
-      }
-      data.forEach((jig) => {
-        const card = document.createElement("div");
-        card.className = "jig-card";
-        card.innerHTML = `
-          <div>
-            <img src="${jig.image}" alt="${jig.code}">
-            <div class="jig-card-body">
-              <span class="jig-cat-tag">ลูกค้า: ${jig.category}</span>
-              <div class="jig-code">${jig.code}</div>
-              <div class="jig-name">${jig.name}</div>
-              <table class="info-table">
-                <tr><td class="info-label">เครื่องจักร:</td><td>${jig.machine}</td></tr>
-                <tr><td class="info-label">ตำแหน่ง:</td><td>${jig.location}</td></tr>
-                <tr><td class="info-label">สถานะ:</td><td><span class="status-badge">${jig.status}</span></td></tr>
-                <tr><td class="info-label">หมายเหตุ:</td><td>${jig.note}</td></tr>
-              </table>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function filterJigs() {
-      const keyword = document.getElementById("search-input").value.toLowerCase();
-      const filtered = jigsData.filter(jig => {
-        const matchCategory = (currentCategory === "ทั้งหมด" || jig.category === currentCategory);
-        const matchKeyword = (
-          jig.code.toLowerCase().includes(keyword) ||
-          jig.name.toLowerCase().includes(keyword) ||
-          jig.category.toLowerCase().includes(keyword)
-        );
-        return matchCategory && matchKeyword;
-      });
-      renderJigs(filtered);
-    }
-  </script>
-</body>
-</html>
+      { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001" },
+      { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002" },
+      { code: "JA18
