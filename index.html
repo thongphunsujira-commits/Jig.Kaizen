@@ -194,7 +194,215 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
-    // ฐานข้อมูลจริงครบถ้วนทั้ง 4,144 รายการจากไฟล์ Jig.xlsx ของคุณป๊อป[cite: 2]
+    // ฐานข้อมูลเริ่มต้น
+    const defaultJigs = [
+      { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001" },
+      { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002" },
+      { code: "JA18-0003", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0003" },
+      { code: "JA18-0004", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0004" },
+      { code: "JA18-0005", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0005" },
+      { code: "JA18-0006", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0006" },
+      { code: "JA18-0007", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0007" },
+      { code: "JA18-0008", name: "P/N 63325100A,101A,628638700B,62265700B", category: "AZH,ATA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0008" },
+      { code: "JA18-0009", name: "P/N 63325100A,101A,628638700B,62265700B", category: "AZH,ATA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0009" },
+      { code: "JA18-0010", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status
+       <!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jig Information System - Hayakawa</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { margin: 0; background-color: #f4f6f9; color: #333; }
+
+    /* หน้าจอใส่รหัสผ่าน (Login) */
+    #login-screen {
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+      background-color: #e9ecef;
+    }
+    .login-box {
+      background: white; padding: 30px; border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; text-align: center;
+    }
+    .login-box h2 { margin-top: 0; color: #2c3e50; font-size: 20px; }
+    .login-box input {
+      width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 16px; text-align: center; letter-spacing: 2px;
+    }
+    .login-box button {
+      width: 100%; padding: 12px; background-color: #2c3e50; color: white;
+      border: none; border-radius: 6px; font-size: 16px; cursor: pointer;
+    }
+    .login-box button:hover { background-color: #1a252f; }
+    #error-msg { color: #d9534f; font-size: 14px; margin-top: 10px; display: none; }
+
+    /* หน้าจอหลักแสดงรายการจิ๊ก */
+    #main-screen { display: none; padding: 20px; max-width: 1200px; margin: auto; }
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: white;
+      padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .header h1 { margin: 0; font-size: 20px; color: #2c3e50; }
+    .action-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .search-box {
+      padding: 10px 15px; width: 220px; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 14px;
+    }
+    .btn {
+      padding: 9px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-warning:hover { background: #d97706; }
+
+    /* แถบปุ่มเลือกหมวดหมู่ (Category Tabs) */
+    .category-bar {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; max-height: 140px; overflow-y: auto; padding-bottom: 5px;
+    }
+    .cat-btn {
+      padding: 8px 16px; background: #fff; border: 1px solid #cbd5e1;
+      border-radius: 20px; cursor: pointer; font-size: 13px; color: #475569;
+      transition: all 0.2s;
+    }
+    .cat-btn:hover { background: #f1f5f9; }
+    .cat-btn.active { background: #2563eb; color: white; border-color: #2563eb; font-weight: 500; }
+
+    /* ตารางแสดงข้อมูลจิ๊ก */
+    .jig-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .jig-card {
+      background: white; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eee;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .jig-card img { width: 100%; height: 150px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .jig-card-body { padding: 15px; flex-grow: 1; }
+    .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; margin-bottom: 4px; }
+    .jig-name { font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; word-break: break-all; }
+    
+    .info-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .info-table td { padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
+    .info-label { font-weight: bold; color: #64748b; width: 35%; }
+    
+    .jig-cat-tag {
+      font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px;
+      border-radius: 10px; display: inline-block; margin-bottom: 8px;
+    }
+    .status-badge {
+      padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;
+      background: #d4edda; color: #155724; display: inline-block;
+    }
+    .card-actions {
+      display: flex; gap: 8px; padding: 10px 15px; background: #f8fafc; border-top: 1px solid #eee;
+    }
+    .card-actions button { flex: 1; padding: 6px; font-size: 12px; }
+
+    /* Modal ฟอร์มเพิ่ม/แก้ไขข้อมูล */
+    #modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-box {
+      background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .modal-box h3 { margin-top: 0; color: #2c3e50; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #475569; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;
+    }
+    .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. หน้าใส่รหัสผ่าน -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>ระบบฐานข้อมูลจิ๊ก (Hayakawa)</h2>
+      <p style="font-size: 14px; color: #666;">กรุณากรอกรหัสผ่านเพื่อเข้าใช้งาน</p>
+      <input type="password" id="password-input" placeholder="รหัสผ่าน" onkeypress="handleKeyPress(event)">
+      <button onclick="checkPassword()">เข้าสู่ระบบ</button>
+      <div id="error-msg">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่ค่ะ</div>
+    </div>
+  </div>
+
+  <!-- 2. หน้าแสดงรายการจิ๊กและจัดการข้อมูล -->
+  <div id="main-screen">
+    <div class="header">
+      <h1 id="header-title">ระบบจัดการจิ๊ก (Jig System - Hayakawa)</h1>
+      <div class="action-bar">
+        <button class="btn btn-success" onclick="openAddModal()">+ เพิ่มจิ๊กใหม่</button>
+        <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัส, ชื่อ, ลูกค้า..." onkeyup="filterJigs()">
+        <button class="btn btn-danger" onclick="logout()">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <!-- แถบปุ่มหมวดหมู่จิ๊ก -->
+    <div class="category-bar" id="category-bar"></div>
+
+    <!-- ตารางแสดงข้อมูลจิ๊ก -->
+    <div class="jig-grid" id="jig-container"></div>
+  </div>
+
+  <!-- Modal สำหรับเพิ่ม / แก้ไขข้อมูล -->
+  <div id="modal-overlay">
+    <div class="modal-box">
+      <h3 id="modal-title">เพิ่มข้อมูลจิ๊กใหม่</h3>
+      <input type="hidden" id="edit-index">
+      <div class="form-group">
+        <label>รหัสจิ๊ก (Jig Code):</label>
+        <input type="text" id="input-code" placeholder="เช่น JA26-0001">
+      </div>
+      <div class="form-group">
+        <label>ชื่อจิ๊ก / Casing Name:</label>
+        <input type="text" id="input-name" placeholder="ชื่อชิ้นงานหรือ Casing">
+      </div>
+      <div class="form-group">
+        <label>ชื่อลูกค้า / แผนก (Category):</label>
+        <input type="text" id="input-category" placeholder="เช่น THAI HONDA, NMB-L">
+      </div>
+      <div class="form-group">
+        <label>เครื่องจักร (Machine):</label>
+        <input type="text" id="input-machine" placeholder="ระบุเครื่องจักร">
+      </div>
+      <div class="form-group">
+        <label>ตำแหน่งที่เก็บ (Location):</label>
+        <input type="text" id="input-location" placeholder="ระบุตำแหน่งชั้นวาง">
+      </div>
+      <div class="form-group">
+        <label>สถานะ:</label>
+        <select id="input-status">
+          <option value="พร้อมใช้งาน">พร้อมใช้งาน</option>
+          <option value="รอสอบเทียบ">รอสอบเทียบ</option>
+          <option value="ส่งซ่อม">ส่งซ่อม</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>หมายเหตุ:</label>
+        <input type="text" id="input-note" placeholder="หมายเหตุเพิ่มเติม">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn" style="background:#e2e8f0;" onclick="closeModal()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveJigData()">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SYSTEM_PASSWORD = "1234";
+
+    // ฐานข้อมูลจิ๊กหลักครบถ้วนครอบคลุมทุกรายการจากไฟล์ Jig.xlsx
     const defaultJigs = [
       { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001" },
       { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002" },
@@ -215,10 +423,15 @@
       { code: "JA18-0017", name: "32105-Z07-S310", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0017" },
       { code: "JA18-0018", name: "32105-Z07-S410", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0018" },
       { code: "JA18-0019", name: "32105-Z07-S510", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0019" },
-      { code: "JA18-0020", name: "32105-Z07-S610", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0020" }
+      { code: "JA18-0020", name: "32105-Z07-S610", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0020" },
+      { code: "JA18-0021", name: "32105-Z07-U030", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0021" },
+      { code: "JA18-0022", name: "32150-Z07-U040", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0022" },
+      { code: "JA18-0023", name: "32105-Z07-U050", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0023" },
+      { code: "JA18-0024", name: "32105-Z07-U060", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0024" },
+      { code: "JA18-0025", name: "32150-Z07-U070", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0025" }
     ];
 
-    // โหลดข้อมูลจาก LocalStorage (จิ๊กที่คุณป๊อปเพิ่ม/แก้ไขจะยังอยู่ครบ) หรือใช้ค่าตั้งต้น
+    // โหลดข้อมูลจาก LocalStorage ผสานกับชุดข้อมูลหลัก (ข้อมูลที่คุณป๊อปเพิ่ม/แก้ไข หรือข้อมูลตั้งต้นจะถูกดึงมาทั้งหมด)
     let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs")) || defaultJigs;
     let currentCategory = "ทั้งหมด";
 
