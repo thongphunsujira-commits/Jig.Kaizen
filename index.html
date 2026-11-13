@@ -33,18 +33,30 @@
     #main-screen { display: none; padding: 20px; max-width: 1100px; margin: auto; }
     .header {
       display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: white;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: white;
       padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
     .header h1 { margin: 0; font-size: 20px; color: #2c3e50; }
     .search-box {
-      padding: 10px 15px; width: 280px; border: 1px solid #ccc;
+      padding: 10px 15px; width: 240px; border: 1px solid #ccc;
       border-radius: 6px; font-size: 14px;
     }
     .logout-btn {
       padding: 8px 14px; background: #dc3545; color: white; border: none;
       border-radius: 6px; cursor: pointer; font-size: 14px;
     }
+
+    /* แถบปุ่มเลือกหมวดหมู่ (Category Tabs) */
+    .category-bar {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .cat-btn {
+      padding: 8px 16px; background: #fff; border: 1px solid #cbd5e1;
+      border-radius: 20px; cursor: pointer; font-size: 14px; color: #475569;
+      transition: all 0.2s;
+    }
+    .cat-btn:hover { background: #f1f5f9; }
+    .cat-btn.active { background: #2563eb; color: white; border-color: #2563eb; font-weight: 500; }
 
     /* ตารางรูปภาพจิ๊ก (Grid) */
     .jig-grid {
@@ -61,6 +73,10 @@
     .jig-card-body { padding: 12px; text-align: center; }
     .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; }
     .jig-name { font-size: 14px; color: #555; margin-top: 4px; }
+    .jig-cat-tag {
+      font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px;
+      border-radius: 10px; display: inline-block; margin-top: 6px;
+    }
 
     /* หน้าต่างป๊อปอัปแสดงข้อมูลจิ๊กเมื่อคลิกที่รูป */
     .modal {
@@ -106,7 +122,7 @@
     </div>
   </div>
 
-  <!-- 2. หน้าแสดงรูปภาพจิ๊ก -->
+  <!-- 2. หน้าแสดงรูปภาพจิ๊กและหมวดหมู่ -->
   <div id="main-screen">
     <div class="header">
       <h1>รายการจิ๊ก (Jig Catalog)</h1>
@@ -114,6 +130,11 @@
         <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัสจิ๊ก, ชื่อ, หรือเครื่องจักร..." onkeyup="filterJigs()">
         <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
       </div>
+    </div>
+
+    <!-- แถบปุ่มหมวดหมู่จิ๊ก -->
+    <div class="category-bar" id="category-bar">
+      <!-- ปุ่มหมวดหมู่จะถูกสร้างอัตโนมัติ -->
     </div>
 
     <div class="jig-grid" id="jig-container">
@@ -133,6 +154,7 @@
         <table class="info-table">
           <tr><td class="info-label">รหัสจิ๊ก (Jig ID):</td><td id="modal-code"></td></tr>
           <tr><td class="info-label">ชื่อจิ๊ก:</td><td id="modal-name"></td></tr>
+          <tr><td class="info-label">ประเภท/หมวดหมู่:</td><td id="modal-category"></td></tr>
           <tr><td class="info-label">เครื่องจักร / ไลน์:</td><td id="modal-machine"></td></tr>
           <tr><td class="info-label">ตำแหน่งจัดเก็บ:</td><td id="modal-location"></td></tr>
           <tr><td class="info-label">สถานะ:</td><td><span class="status-badge" id="modal-status"></span></td></tr>
@@ -144,28 +166,29 @@
 
   <script>
     // ==========================================
-    // ตั้งค่ารหัสผ่านเข้าเว็บไซต์ตรงนี้ค่ะ
+    // รหัสผ่านเข้าเว็บไซต์
     // ==========================================
     const SYSTEM_PASSWORD = "1234";
 
     // ==========================================
-    // ข้อมูลจิ๊ก (สามารถเพิ่ม/แก้ไขรายการตรงนี้ได้เลยค่ะ)
+    // ข้อมูลจิ๊ก (สามารถเพิ่ม/แก้ไขหมวดหมู่ตรง category ได้เลยค่ะ)
     // ==========================================
     const jigsData = [
       {
         code: "JIG-001",
         name: "Jig Assembly Housing A",
-        machine: "Line 1 - MC01",
+        category: "Line 1", // หมวดหมู่จิ๊ก
+        machine: "MC01",
         location: "Shelf A-01",
         status: "พร้อมใช้งาน (Active)",
-        note: "ตรวจสอบความสะอาดก่อนเริ่มงานทุกครั้ง",
-        // เปลี่ยนลิงก์รูปภาพจริงตรงบรรทัดด้านล่างนี้ค่ะ
+        note: "ตรวจสอบความสะอาดก่อนเริ่มงาน",
         image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JIG-001"
       },
       {
         code: "JIG-002",
         name: "Jig Press Connector B",
-        machine: "Line 2 - MC04",
+        category: "Line 2",
+        machine: "MC04",
         location: "Shelf A-02",
         status: "พร้อมใช้งาน (Active)",
         note: "ใช้คู่กับหัวกดเบอร์ 4",
@@ -174,16 +197,18 @@
       {
         code: "JIG-003",
         name: "Jig Check Pin Gauge",
-        machine: "QC Station 1",
+        category: "QC Station",
+        machine: "Inspection Area",
         location: "Shelf B-05",
-        status: "รอสอบเทียบ (Calibration)",
-        note: "ส่งตรวจเช็กทุกวันที่ 15 ของเดือน",
+        status: "รอสอบเทียบ",
+        note: "ส่งตรวจเช็กทุกวันที่ 15",
         image: "https://placehold.co/400x300/fef3c7/92400e?text=JIG-003"
       },
       {
         code: "JIG-004",
         name: "Jig Soldering Base C",
-        machine: "Line 3 - MC02",
+        category: "Line 3",
+        machine: "MC02",
         location: "Shelf C-01",
         status: "พร้อมใช้งาน (Active)",
         note: "ทนความร้อนสูง",
@@ -191,13 +216,15 @@
       }
     ];
 
-    // ฟังก์ชันตรวจสอบรหัสผ่าน
+    let currentCategory = "ทั้งหมด";
+
     function checkPassword() {
       const input = document.getElementById("password-input").value;
       if (input === SYSTEM_PASSWORD) {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("main-screen").style.display = "block";
         document.getElementById("error-msg").style.display = "none";
+        renderCategories();
         renderJigs(jigsData);
       } else {
         document.getElementById("error-msg").style.display = "block";
@@ -214,10 +241,32 @@
       document.getElementById("login-screen").style.display = "flex";
     }
 
+    // สร้างปุ่มหมวดหมู่ด้านบนอัตโนมัติ
+    function renderCategories() {
+      const categories = ["ทั้งหมด", ...new Set(jigsData.map(j => j.category))];
+      const bar = document.getElementById("category-bar");
+      bar.innerHTML = "";
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = `cat-btn ${cat === currentCategory ? 'active' : ''}`;
+        btn.innerText = cat;
+        btn.onclick = () => {
+          currentCategory = cat;
+          renderCategories();
+          filterJigs();
+        };
+        bar.appendChild(btn);
+      });
+    }
+
     // สร้างการ์ดรูปภาพจิ๊ก
     function renderJigs(data) {
       const container = document.getElementById("jig-container");
       container.innerHTML = "";
+      if (data.length === 0) {
+        container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #666; padding: 20px;'>ไม่พบข้อมูลจิ๊กในหมวดหมู่นี้</p>";
+        return;
+      }
       data.forEach((jig) => {
         const card = document.createElement("div");
         card.className = "jig-card";
@@ -227,30 +276,37 @@
           <div class="jig-card-body">
             <div class="jig-code">${jig.code}</div>
             <div class="jig-name">${jig.name}</div>
+            <span class="jig-cat-tag">${jig.category}</span>
           </div>
         `;
         container.appendChild(card);
       });
     }
 
-    // ค้นหาจิ๊ก
+    // กรองและค้นหาจิ๊ก
     function filterJigs() {
       const keyword = document.getElementById("search-input").value.toLowerCase();
-      const filtered = jigsData.filter(jig =>
-        jig.code.toLowerCase().includes(keyword) ||
-        jig.name.toLowerCase().includes(keyword) ||
-        jig.machine.toLowerCase().includes(keyword) ||
-        jig.location.toLowerCase().includes(keyword)
-      );
+      const filtered = jigsData.filter(jig => {
+        const matchCategory = (currentCategory === "ทั้งหมด" || jig.category === currentCategory);
+        const matchKeyword = (
+          jig.code.toLowerCase().includes(keyword) ||
+          jig.name.toLowerCase().includes(keyword) ||
+          jig.machine.toLowerCase().includes(keyword) ||
+          jig.location.toLowerCase().includes(keyword) ||
+          jig.category.toLowerCase().includes(keyword)
+        );
+        return matchCategory && matchKeyword;
+      });
       renderJigs(filtered);
     }
 
-    // เปิดป๊อปอัปแสดงข้อมูลจิ๊กเมื่อคลิกที่รูป
+    // เปิดป๊อปอัปแสดงข้อมูลจิ๊ก
     function openModal(jig) {
       document.getElementById("modal-title").innerText = "ข้อมูลจิ๊ก: " + jig.code;
       document.getElementById("modal-img").src = jig.image;
       document.getElementById("modal-code").innerText = jig.code;
       document.getElementById("modal-name").innerText = jig.name;
+      document.getElementById("modal-category").innerText = jig.category;
       document.getElementById("modal-machine").innerText = jig.machine;
       document.getElementById("modal-location").innerText = jig.location;
       document.getElementById("modal-status").innerText = jig.status;
