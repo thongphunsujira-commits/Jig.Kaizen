@@ -38,7 +38,7 @@
     }
     .header h1 { margin: 0; font-size: 20px; color: #2c3e50; }
     .search-box {
-      padding: 10px 15px; width: 240px; border: 1px solid #ccc;
+      padding: 10px 15px; width: 260px; border: 1px solid #ccc;
       border-radius: 6px; font-size: 14px;
     }
     .logout-btn {
@@ -48,11 +48,11 @@
 
     /* แถบปุ่มเลือกหมวดหมู่ (Category Tabs) */
     .category-bar {
-      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; max-height: 120px; overflow-y: auto; padding-bottom: 5px;
     }
     .cat-btn {
       padding: 8px 16px; background: #fff; border: 1px solid #cbd5e1;
-      border-radius: 20px; cursor: pointer; font-size: 14px; color: #475569;
+      border-radius: 20px; cursor: pointer; font-size: 13px; color: #475569;
       transition: all 0.2s;
     }
     .cat-btn:hover { background: #f1f5f9; }
@@ -68,14 +68,14 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eee;
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    .jig-card img { width: 100%; height: 160px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .jig-card img { width: 100%; height: 150px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
     .jig-card-body { padding: 15px; flex-grow: 1; }
     .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; margin-bottom: 4px; }
-    .jig-name { font-size: 15px; color: #333; font-weight: 600; margin-bottom: 10px; }
+    .jig-name { font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; word-break: break-all; }
     
     .info-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
     .info-table td { padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
-    .info-label { font-weight: bold; color: #64748b; width: 40%; }
+    .info-label { font-weight: bold; color: #64748b; width: 35%; }
     
     .jig-cat-tag {
       font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px;
@@ -105,7 +105,7 @@
     <div class="header">
       <h1>รายการจิ๊ก (Jig Catalog)</h1>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัสจิ๊ก, ชื่อ, หรือเครื่องจักร..." onkeyup="filterJigs()">
+        <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัส, ชื่อ, หรือลูกค้า..." onkeyup="filterJigs()">
         <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
       </div>
     </div>
@@ -120,47 +120,107 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
-    // พื้นที่ใส่ข้อมูลจิ๊ก (สามารถเพิ่ม/แก้ไขข้อมูลตรงนี้ได้เลยค่ะ)
+    // ฐานข้อมูลจิ๊กจริงจากไฟล์ Jig.xlsx ของคุณป๊อป
     const jigsData = [
       {
-        code: "JIG-001",
-        name: "Jig Assembly Housing A",
-        category: "Line 1",
-        machine: "MC01",
-        location: "Shelf A-01",
-        status: "พร้อมใช้งาน (Active)",
-        note: "ตรวจสอบความสะอาดก่อนเริ่มงาน",
-        image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JIG-001"
+        code: "JA18-0001",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001"
       },
       {
-        code: "JIG-002",
-        name: "Jig Press Connector B",
-        category: "Line 2",
-        machine: "MC04",
-        location: "Shelf A-02",
-        status: "พร้อมใช้งาน (Active)",
-        note: "ใช้คู่กับหัวกดเบอร์ 4",
-        image: "https://placehold.co/400x300/dbeafe/1e40af?text=JIG-002"
+        code: "JA18-0002",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002"
       },
       {
-        code: "JIG-003",
-        name: "Jig Check Pin Gauge",
-        category: "QC Station",
-        machine: "Inspection Area",
-        location: "Shelf B-05",
-        status: "รอสอบเทียบ",
-        note: "ส่งตรวจเช็กทุกวันที่ 15",
-        image: "https://placehold.co/400x300/fef3c7/92400e?text=JIG-003"
+        code: "JA18-0003",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0003"
       },
       {
-        code: "JIG-004",
-        name: "Jig Soldering Base C",
-        category: "Line 3",
-        machine: "MC02",
-        location: "Shelf C-01",
-        status: "พร้อมใช้งาน (Active)",
-        note: "ทนความร้อนสูง",
-        image: "https://placehold.co/400x300/dcfce7/166534?text=JIG-004"
+        code: "JA18-0004",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0004"
+      },
+      {
+        code: "JA18-0005",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0005"
+      },
+      {
+        code: "JA18-0006",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0006"
+      },
+      {
+        code: "JA18-0007",
+        name: "H.7C82-0651-70",
+        category: "AJT,AZA,ATA,ACG",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0007"
+      },
+      {
+        code: "JA18-0008",
+        name: "P/N 63325100A,101A,628638700B,62265700B",
+        category: "AZH,ATA",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0008"
+      },
+      {
+        code: "JA18-0009",
+        name: "P/N 63325100A,101A,628638700B,62265700B",
+        category: "AZH,ATA",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0009"
+      },
+      {
+        code: "JA18-0010",
+        name: "32105-Z07-8920",
+        category: "THAI HONDA",
+        machine: "-",
+        location: "-",
+        status: "พร้อมใช้งาน",
+        note: "-",
+        image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0010"
       }
     ];
 
@@ -221,7 +281,7 @@
           <div>
             <img src="${jig.image}" alt="${jig.code}">
             <div class="jig-card-body">
-              <span class="jig-cat-tag">${jig.category}</span>
+              <span class="jig-cat-tag">ลูกค้า: ${jig.category}</span>
               <div class="jig-code">${jig.code}</div>
               <div class="jig-name">${jig.name}</div>
               <table class="info-table">
@@ -244,8 +304,6 @@
         const matchKeyword = (
           jig.code.toLowerCase().includes(keyword) ||
           jig.name.toLowerCase().includes(keyword) ||
-          jig.machine.toLowerCase().includes(keyword) ||
-          jig.location.toLowerCase().includes(keyword) ||
           jig.category.toLowerCase().includes(keyword)
         );
         return matchCategory && matchKeyword;
