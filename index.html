@@ -194,7 +194,6 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
-    // ข้อมูลเริ่มต้นพื้นฐาน
     const defaultJigs = [
       { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001" },
       { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002" },
@@ -202,7 +201,6 @@
       { code: "THAI-001", name: "32105-Z07-8920", category: "THAI HONDA", machine: "MC-01", location: "Shelf A1", status: "พร้อมใช้งาน", note: "ตรวจเช็กประจำปี", image: "https://placehold.co/400x300/dcfce7/166534?text=THAI-001" }
     ];
 
-    // โหลดข้อมูลจาก LocalStorage (ถ้ามี) หรือใช้ค่าเริ่มต้น
     let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs")) || defaultJigs;
     let currentCategory = "ทั้งหมด";
 
@@ -255,7 +253,6 @@
         return;
       }
       data.forEach((jig) => {
-        // หา Index จริงใน jigsData เพื่อใช้อ้างอิงเวลาแก้ไขหรือลบ
         const realIndex = jigsData.findIndex(item => item.code === jig.code && item.name === jig.name);
 
         const card = document.createElement("div");
@@ -299,7 +296,6 @@
       renderJigs(filtered);
     }
 
-    // ฟังก์ชันจัดการ Modal
     function openAddModal() {
       document.getElementById("modal-title").innerText = "เพิ่มข้อมูลจิ๊กใหม่";
       document.getElementById("edit-index").value = "";
@@ -349,16 +345,12 @@
       const image = `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`;
 
       if (editIndex === "") {
-        // เพิ่มใหม่
         jigsData.unshift({ code, name, category, machine, location, status, note, image });
       } else {
-        // แก้ไข
         jigsData[editIndex] = { code, name, category, machine, location, status, note, image };
       }
 
-      // บันทึกลง LocalStorage
       localStorage.setItem("hayakawa_jigs", JSON.stringify(jigsData));
-
       closeModal();
       renderCategories();
       filterJigs();
