@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jig Information System</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { margin: 0; background-color: #f4f6f9; color: #333; }
+
+    /* หน้าจอใส่รหัสผ่าน (Login) */
+    #login-screen {
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+      background-color: #e9ecef;
+    }
+    .login-box {
+      background: white; padding: 30px; border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; text-align: center;
+    }
+    .login-box h2 { margin-top: 0; color: #2c3e50; font-size: 20px; }
+    .login-box input {
+      width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 16px; text-align: center; letter-spacing: 2px;
+    }
+    .login-box button {
+      width: 100%; padding: 12px; background-color: #2c3e50; color: white;
+      border: none; border-radius: 6px; font-size: 16px; cursor: pointer;
+    }
+    .login-box button:hover { background-color: #1a252f; }
+    #error-msg { color: #d9534f; font-size: 14px; margin-top: 10px; display: none; }
+
+    /* หน้าจอหลักแสดงรายการจิ๊ก */
+    #main-screen { display: none; padding: 20px; max-width: 1100px; margin: auto; }
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: white;
+      padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .header h1 { margin: 0; font-size: 20px; color: #2c3e50; }
+    .search-box {
+      padding: 10px 15px; width: 280px; border: 1px solid #ccc;
+      border-radius: 6px; font-size: 14px;
+    }
+    .logout-btn {
+      padding: 8px 14px; background: #dc3545; color: white; border: none;
+      border-radius: 6px; cursor: pointer; font-size: 14px;
+    }
+
+    /* ตารางรูปภาพจิ๊ก (Grid) */
+    .jig-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .jig-card {
+      background: white; border-radius: 8px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #eee;
+    }
+    .jig-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    .jig-card img { width: 100%; height: 160px; object-fit: cover; background: #f8f9fa; }
+    .jig-card-body { padding: 12px; text-align: center; }
+    .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; }
+    .jig-name { font-size: 14px; color: #555; margin-top: 4px; }
+
+    /* หน้าต่างป๊อปอัปแสดงข้อมูลจิ๊กเมื่อคลิกที่รูป */
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+      width: 100%; height: 100%; background-color: rgba(0,0,0,0.6);
+      justify-content: center; align-items: center; padding: 15px;
+    }
+    .modal-content {
+      background: white; border-radius: 10px; max-width: 500px; width: 100%;
+      overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.25); animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .modal-header {
+      background: #2c3e50; color: white; padding: 15px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-header h3 { margin: 0; font-size: 18px; }
+    .close-btn { font-size: 24px; cursor: pointer; color: white; border: none; background: none; }
+    .modal-body { padding: 20px; }
+    .modal-body img {
+      width: 100%; max-height: 250px; object-fit: contain;
+      background: #f8f9fa; border-radius: 6px; margin-bottom: 15px; border: 1px solid #eee;
+    }
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table td { padding: 8px 5px; border-bottom: 1px solid #eee; font-size: 15px; }
+    .info-label { font-weight: bold; color: #555; width: 35%; }
+    .status-badge {
+      padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold;
+      background: #d4edda; color: #155724; display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. หน้าใส่รหัสผ่าน -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>ระบบฐานข้อมูลจิ๊ก (Jig System)</h2>
+      <p style="font-size: 14px; color: #666;">กรุณากรอกรหัสผ่านเพื่อเข้าใช้งาน</p>
+      <input type="password" id="password-input" placeholder="รหัสผ่าน" onkeypress="handleKeyPress(event)">
+      <button onclick="checkPassword()">เข้าสู่ระบบ</button>
+      <div id="error-msg">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่ค่ะ</div>
+    </div>
+  </div>
+
+  <!-- 2. หน้าแสดงรูปภาพจิ๊ก -->
+  <div id="main-screen">
+    <div class="header">
+      <h1>รายการจิ๊ก (Jig Catalog)</h1>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัสจิ๊ก, ชื่อ, หรือเครื่องจักร..." onkeyup="filterJigs()">
+        <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <div class="jig-grid" id="jig-container">
+      <!-- รูปภาพจิ๊กจะถูกสร้างอัตโนมัติจากข้อมูลด้านล่าง -->
+    </div>
+  </div>
+
+  <!-- 3. หน้าต่างแสดงรายละเอียดเมื่อกดที่รูป -->
+  <div id="detail-modal" class="modal" onclick="closeModalOutside(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">รายละเอียดจิ๊ก</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="modal-img" src="" alt="รูปภาพจิ๊ก">
+        <table class="info-table">
+          <tr><td class="info-label">รหัสจิ๊ก (Jig ID):</td><td id="modal-code"></td></tr>
+          <tr><td class="info-label">ชื่อจิ๊ก:</td><td id="modal-name"></td></tr>
+          <tr><td class="info-label">เครื่องจักร / ไลน์:</td><td id="modal-machine"></td></tr>
+          <tr><td class="info-label">ตำแหน่งจัดเก็บ:</td><td id="modal-location"></td></tr>
+          <tr><td class="info-label">สถานะ:</td><td><span class="status-badge" id="modal-status"></span></td></tr>
+          <tr><td class="info-label">หมายเหตุ:</td><td id="modal-note"></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // ตั้งค่ารหัสผ่านเข้าเว็บไซต์ตรงนี้ค่ะ
+    // ==========================================
+    const SYSTEM_PASSWORD = "1234";
+
+    // ==========================================
+    // ข้อมูลจิ๊ก (สามารถเพิ่ม/แก้ไขรายการตรงนี้ได้เลยค่ะ)
+    // ==========================================
+    const jigsData = [
+      {
+        code: "JIG-001",
+        name: "Jig Assembly Housing A",
+        machine: "Line 1 - MC01",
+        location: "Shelf A-01",
+        status: "พร้อมใช้งาน (Active)",
+        note: "ตรวจสอบความสะอาดก่อนเริ่มงานทุกครั้ง",
+        // เปลี่ยนลิงก์รูปภาพจริงตรงบรรทัดด้านล่างนี้ค่ะ
+        image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JIG-001"
+      },
+      {
+        code: "JIG-002",
+        name: "Jig Press Connector B",
+        machine: "Line 2 - MC04",
+        location: "Shelf A-02",
+        status: "พร้อมใช้งาน (Active)",
+        note: "ใช้คู่กับหัวกดเบอร์ 4",
+        image: "https://placehold.co/400x300/dbeafe/1e40af?text=JIG-002"
+      },
+      {
+        code: "JIG-003",
+        name: "Jig Check Pin Gauge",
+        machine: "QC Station 1",
+        location: "Shelf B-05",
+        status: "รอสอบเทียบ (Calibration)",
+        note: "ส่งตรวจเช็กทุกวันที่ 15 ของเดือน",
+        image: "https://placehold.co/400x300/fef3c7/92400e?text=JIG-003"
+      },
+      {
+        code: "JIG-004",
+        name: "Jig Soldering Base C",
+        machine: "Line 3 - MC02",
+        location: "Shelf C-01",
+        status: "พร้อมใช้งาน (Active)",
+        note: "ทนความร้อนสูง",
+        image: "https://placehold.co/400x300/dcfce7/166534?text=JIG-004"
+      }
+    ];
+
+    // ฟังก์ชันตรวจสอบรหัสผ่าน
+    function checkPassword() {
+      const input = document.getElementById("password-input").value;
+      if (input === SYSTEM_PASSWORD) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("main-screen").style.display = "block";
+        document.getElementById("error-msg").style.display = "none";
+        renderJigs(jigsData);
+      } else {
+        document.getElementById("error-msg").style.display = "block";
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === "Enter") checkPassword();
+    }
+
+    function logout() {
+      document.getElementById("password-input").value = "";
+      document.getElementById("main-screen").style.display = "none";
+      document.getElementById("login-screen").style.display = "flex";
+    }
+
+    // สร้างการ์ดรูปภาพจิ๊ก
+    function renderJigs(data) {
+      const container = document.getElementById("jig-container");
+      container.innerHTML = "";
+      data.forEach((jig) => {
+        const card = document.createElement("div");
+        card.className = "jig-card";
+        card.onclick = () => openModal(jig);
+        card.innerHTML = `
+          <img src="${jig.image}" alt="${jig.code}">
+          <div class="jig-card-body">
+            <div class="jig-code">${jig.code}</div>
+            <div class="jig-name">${jig.name}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ค้นหาจิ๊ก
+    function filterJigs() {
+      const keyword = document.getElementById("search-input").value.toLowerCase();
+      const filtered = jigsData.filter(jig =>
+        jig.code.toLowerCase().includes(keyword) ||
+        jig.name.toLowerCase().includes(keyword) ||
+        jig.machine.toLowerCase().includes(keyword) ||
+        jig.location.toLowerCase().includes(keyword)
+      );
+      renderJigs(filtered);
+    }
+
+    // เปิดป๊อปอัปแสดงข้อมูลจิ๊กเมื่อคลิกที่รูป
+    function openModal(jig) {
+      document.getElementById("modal-title").innerText = "ข้อมูลจิ๊ก: " + jig.code;
+      document.getElementById("modal-img").src = jig.image;
+      document.getElementById("modal-code").innerText = jig.code;
+      document.getElementById("modal-name").innerText = jig.name;
+      document.getElementById("modal-machine").innerText = jig.machine;
+      document.getElementById("modal-location").innerText = jig.location;
+      document.getElementById("modal-status").innerText = jig.status;
+      document.getElementById("modal-note").innerText = jig.note;
+      document.getElementById("detail-modal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("detail-modal").style.display = "none";
+    }
+
+    function closeModalOutside(e) {
+      if (e.target.id === "detail-modal") closeModal();
+    }
+  </script>
+</body>
+</html>
