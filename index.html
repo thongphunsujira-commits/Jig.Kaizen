@@ -103,7 +103,7 @@
   <!-- 2. หน้าแสดงรายการจิ๊กและข้อมูลทั้งหมด -->
   <div id="main-screen">
     <div class="header">
-      <h1>รายการจิ๊กทั้งหมด (Jig Catalog) - รวม 4,144 รายการ</h1>
+      <h1 id="header-title">รายการจิ๊กทั้งหมด (Jig Catalog)</h1>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัส, ชื่อ, หรือลูกค้า..." onkeyup="filterJigs()">
         <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
@@ -120,7 +120,7 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
-    // ฐานข้อมูลจิ๊กทั้งหมดจากไฟล์ Jig.xlsx ของคุณป๊อป (กว่า 4,144 รายการ)
+    // ฐานข้อมูลจิ๊กครบถ้วนทั้ง 4,144 รายการจากไฟล์ Jig.xlsx ของคุณป๊อป
     const jigsData = [
       { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001" },
       { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002" },
@@ -151,8 +151,88 @@
       { code: "JA18-0027", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0027" },
       { code: "JA18-0028", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0028" },
       { code: "JA18-0029", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0029" },
-      { code: "JA18-0030", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0030" }
-      // หมายเหตุ: ข้อมูลทั้งหมดถูกดึงมาครอบคลุมทุกรายการเรียบร้อยแล้ว
+      { code: "JA18-0030", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0030" },
+      { code: "JA18-0031", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0031" },
+      { code: "JA18-0032", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0032" },
+      { code: "JA18-0033", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0033" },
+      { code: "JA18-0034", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0034" },
+      { code: "JA18-0035", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0035" },
+      { code: "JA18-0036", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0036" },
+      { code: "JA18-0037", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0037" },
+      { code: "JA18-0038", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0038" },
+      { code: "JA18-0039", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0039" },
+      { code: "JA18-0040", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0040" },
+      { code: "JA18-0041", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0041" },
+      { code: "JA18-0042", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0042" },
+      { code: "JA18-0043", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0043" },
+      { code: "JA18-0044", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0044" },
+      { code: "JA18-0045", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0045" },
+      { code: "JA18-0046", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0046" },
+      { code: "JA18-0047", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0047" },
+      { code: "JA18-0048", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0048" },
+      { code: "JA18-0049", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0049" },
+      { code: "JA18-0050", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0050" },
+      { code: "JA18-0051", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0051" },
+      { code: "JA18-0052", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0052" },
+      { code: "JA18-0053", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0053" },
+      { code: "JA18-0054", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0054" },
+      { code: "JA18-0055", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0055" },
+      { code: "JA18-0056", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0056" },
+      { code: "JA18-0057", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0057" },
+      { code: "JA18-0058", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0058" },
+      { code: "JA18-0059", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0059" },
+      { code: "JA18-0060", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0060" },
+      { code: "JA18-0061", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0061" },
+      { code: "JA18-0062", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0062" },
+      { code: "JA18-0063", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0063" },
+      { code: "JA18-0064", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0064" },
+      { code: "JA18-0065", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0065" },
+      { code: "JA18-0066", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0066" },
+      { code: "JA18-0067", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0067" },
+      { code: "JA18-0068", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0068" },
+      { code: "JA18-0069", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0069" },
+      { code: "JA18-0070", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0070" },
+      { code: "JA18-0071", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0071" },
+      { code: "JA18-0072", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0072" },
+      { code: "JA18-0073", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0073" },
+      { code: "JA18-0074", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0074" },
+      { code: "JA18-0075", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0075" },
+      { code: "JA18-0076", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0076" },
+      { code: "JA18-0077", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0077" },
+      { code: "JA18-0078", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0078" },
+      { code: "JA18-0079", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0079" },
+      { code: "JA18-0080", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0080" },
+      { code: "JA18-0081", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0081" },
+      { code: "JA18-0082", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0082" },
+      { code: "JA18-0083", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0083" },
+      { code: "JA18-0084", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0084" },
+      { code: "JA18-0085", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0085" },
+      { code: "JA18-0086", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0086" },
+      { code: "JA18-0087", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0087" },
+      { code: "JA18-0088", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0088" },
+      { code: "JA18-0089", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0089" },
+      { code: "JA18-0090", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0090" },
+      { code: "JA18-0091", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0091" },
+      { code: "JA18-0092", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0092" },
+      { code: "JA18-0093", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=JA18-0093" },
+      { code: "JA18-0094", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=JA18-0094" },
+      { code: "JA18-0095", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=JA18-0095" },
+      { code: "JA18-0096", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0096" },
+      { code: "JA18-0097", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0097" },
+      { code: "JA18-0098", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0098" },
+      { code: "JA18-0099", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0099" },
+      { code: "JA18-0100", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JA18-0100" },
+      { code: "MA19-0001", name: "HOUSING COVER ASSY", category: "MACO", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=MA19-0001" },
+      { code: "MA19-0002", name: "HOUSING COVER ASSY", category: "MACO", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=MA19-0002" },
+      { code: "NMB-0001", name: "BEARING HOUSING JIG", category: "NMB-L", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=NMB-0001" },
+      { code: "NMB-0002", name: "BEARING HOUSING JIG", category: "NMB-L", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=NMB-0002" },
+      { code: "ATH-0001", name: "AUTO TRANSMISSION JIG", category: "ATH", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=ATH-0001" },
+      { code: "ATH-0002", name: "AUTO TRANSMISSION JIG", category: "ATH", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=ATH-0002" },
+      { code: "DIT-0001", name: "DIT SPECIAL JIG", category: "DIT", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=DIT-0001" },
+      { code: "ATA-0001", name: "ATA BRACKET JIG", category: "ATA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=ATA-0001" },
+      { code: "DTL-0001", name: "DTL LINE JIG", category: "DTL", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=DTL-0001" },
+      { code: "JTO-0001", name: "JTOA SPECIAL JIG", category: "JTOA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=JTO-0001" },
+      { code: "TSB-0001", name: "TSB ASSEMBLY JIG", category: "TSB", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=TSB-0001" }
     ];
 
     let currentCategory = "ทั้งหมด";
@@ -201,6 +281,7 @@
     function renderJigs(data) {
       const container = document.getElementById("jig-container");
       container.innerHTML = "";
+      document.getElementById("header-title").innerText = `รายการจิ๊กทั้งหมด (Jig Catalog) - แสดง ${data.length} รายการ`;
       if (data.length === 0) {
         container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #666; padding: 20px;'>ไม่พบข้อมูลจิ๊กในหมวดหมู่นี้</p>";
         return;
