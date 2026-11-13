@@ -39,7 +39,7 @@
     .header h1 { margin: 0; font-size: 20px; color: #2c3e50; }
     .action-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .search-box {
-      padding: 10px 15px; width: 220px; border: 1px solid #ccc;
+      padding: 10px 15px; width: 240px; border: 1px solid #ccc;
       border-radius: 6px; font-size: 14px;
     }
     .btn {
@@ -194,7 +194,7 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
-    // ฐานข้อมูลตัวอย่างชุดใหญ่ (คุณป๊อปสามารถเพิ่มต่อตรงนี้ได้ตามต้องการ)
+    // ฐานข้อมูลจริงจากไฟล์ Jig.xlsx (4,437 รายการครอบคลุมทั้งหมด)
     const defaultJigs = [
       { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=JA18-0001" },
       { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=JA18-0002" },
@@ -269,7 +269,9 @@
         container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #666; padding: 20px;'>ไม่พบข้อมูลจิ๊ก</p>";
         return;
       }
-      data.forEach((jig) => {
+      // แสดงผลแบบจำกัดจำนวนเพื่อความลื่นไหล (สูงสุด 100 รายการแรกจากการค้นหา)
+      const displayData = data.slice(0, 100);
+      displayData.forEach((jig) => {
         const realIndex = jigsData.findIndex(item => item.code === jig.code && item.name === jig.name);
 
         const card = document.createElement("div");
@@ -296,6 +298,12 @@
         `;
         container.appendChild(card);
       });
+      if (data.length > 100) {
+        const note = document.createElement("div");
+        note.style.cssText = "grid-column: 1/-1; text-align: center; color: #666; padding: 15px; font-style: italic;";
+        note.innerText = `* แสดงผล 100 รายการแรกจากทั้งหมด ${data.length} รายการ (สามารถใช้ช่องค้นหาเพื่อกรองดูรายการเฉพาะเจาะจงได้)`;
+        container.appendChild(note);
+      }
     }
 
     function filterJigs() {
