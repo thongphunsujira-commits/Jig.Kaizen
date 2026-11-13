@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jig Information System - Hayakawa</title>
+  <!-- SheetJS สำหรับอ่านไฟล์ Excel ได้โดยตรงบนเว็บ -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { margin: 0; background-color: #f4f6f9; color: #333; }
@@ -36,14 +38,14 @@
       flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: white;
       padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-    .header h1 { margin: 0; font-size: 20px; color: #2c3e50; }
-    .action-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .header h1 { margin: 0; font-size: 18px; color: #2c3e50; }
+    .action-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .search-box {
-      padding: 10px 15px; width: 240px; border: 1px solid #ccc;
+      padding: 9px 12px; width: 200px; border: 1px solid #ccc;
       border-radius: 6px; font-size: 14px;
     }
     .btn {
-      padding: 9px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;
+      padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
     }
     .btn-primary { background: #2563eb; color: white; }
     .btn-primary:hover { background: #1d4ed8; }
@@ -53,14 +55,16 @@
     .btn-danger:hover { background: #b91c1c; }
     .btn-warning { background: #f59e0b; color: white; }
     .btn-warning:hover { background: #d97706; }
+    .btn-excel { background: #0ea5e9; color: white; }
+    .btn-excel:hover { background: #0284c7; }
 
     /* แถบปุ่มเลือกหมวดหมู่ (Category Tabs) */
     .category-bar {
-      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; max-height: 140px; overflow-y: auto; padding-bottom: 5px;
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; max-height: 120px; overflow-y: auto; padding-bottom: 5px;
     }
     .cat-btn {
-      padding: 8px 16px; background: #fff; border: 1px solid #cbd5e1;
-      border-radius: 20px; cursor: pointer; font-size: 13px; color: #475569;
+      padding: 6px 14px; background: #fff; border: 1px solid #cbd5e1;
+      border-radius: 20px; cursor: pointer; font-size: 12px; color: #475569;
       transition: all 0.2s;
     }
     .cat-btn:hover { background: #f1f5f9; }
@@ -76,7 +80,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eee;
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    .jig-card img { width: 100%; height: 170px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .jig-card img { width: 100%; height: 160px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
     .jig-card-body { padding: 15px; flex-grow: 1; }
     .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; margin-bottom: 4px; }
     .jig-name { font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; word-break: break-all; }
@@ -115,7 +119,7 @@
       width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;
     }
     .image-preview-box {
-      width: 100%; height: 140px; border: 2px dashed #cbd5e1; border-radius: 6px;
+      width: 100%; height: 130px; border: 2px dashed #cbd5e1; border-radius: 6px;
       display: flex; justify-content: center; align-items: center; overflow: hidden;
       margin-top: 6px; background: #f8fafc; color: #94a3b8; font-size: 13px;
     }
@@ -139,11 +143,15 @@
   <!-- 2. หน้าแสดงรายการจิ๊กและจัดการข้อมูล -->
   <div id="main-screen">
     <div class="header">
-      <h1 id="header-title">ระบบจัดการจิ๊ก (Jig System - Hayakawa)</h1>
+      <h1 id="header-title">ระบบจัดการจิ๊ก (Hayakawa)</h1>
       <div class="action-bar">
-        <button class="btn btn-success" onclick="openAddModal()">+ เพิ่มจิ๊กใหม่</button>
+        <button class="btn btn-success" onclick="openAddModal()">+ เพิ่มจิ๊ก</button>
+        <!-- ปุ่มอัปโหลดไฟล์ Excel เพื่อดึงข้อมูลทั้งหมดเข้าเว็บแบบสดๆ -->
+        <label class="btn btn-excel" style="cursor: pointer; display: inline-flex; align-items: center;">
+          📁 นำเข้า Excel <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;" onchange="importExcelFile(event)">
+        </label>
         <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัส, ชื่อ, ลูกค้า..." onkeyup="filterJigs()">
-        <button class="btn btn-danger" onclick="logout()">ออกจากระบบ</button>
+        <button class="btn btn-danger" onclick="logout()">ออก</button>
       </div>
     </div>
 
@@ -208,6 +216,7 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
+    // ชุดข้อมูลตั้งต้นกว่า 30 รายการครอบคลุมทุกหมวดหมู่หลัก
     const defaultJigs = [
       { code: "J18-0001", name: "SDR3080135-18", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "Niphon P.", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=J18-0001" },
       { code: "J18-0002", name: "4P385271-3", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=J18-0002" },
@@ -215,13 +224,23 @@
       { code: "J18-0004", name: "503466", category: "SIIX BANGKOK", machine: "ASSY'3", location: "-", status: "พร้อมใช้งาน", note: "SIWARAT", image: "https://placehold.co/400x300/dcfce7/166534?text=J18-0004" },
       { code: "J18-0005", name: "3P267526-1A", category: "DIT", machine: "ASSY'3", location: "-", status: "พร้อมใช้งาน", note: "SIWARAT", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=J18-0005" },
       { code: "JA18-0001", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=JA18-0001" },
-      { code: "JA18-0010", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0010" },
-      { code: "NMB-0001", name: "Casing Housing NMB", category: "NMB-L", machine: "MC-01", location: "Rack A1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=NMB-0001" },
-      { code: "MACO-01", name: "PCB504A412G", category: "MACO", machine: "Line 1", location: "Rack B1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=MACO-01" },
-      { code: "ATH-001", name: "ATH Casing Assy", category: "ATH", machine: "Line 3", location: "Rack C1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=ATH-001" }
+      { code: "JA18-0002", name: "H.7C82-0651-70", category: "AJT,AZA,ATA,ACG", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=JA18-0002" },
+      { code: "JA18-0010", name: "32105-Z07-8920", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=JA18-0010" },
+      { code: "JA18-0011", name: "32150-Z07-U710", category: "THAI HONDA", machine: "-", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JA18-0011" },
+      { code: "NMB-0001", name: "Casing Housing NMB", category: "NMB-L", machine: "MC-01", location: "Rack A1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=NMB-0001" },
+      { code: "NMB-0002", name: "Casing Housing NMB", category: "NMB-L", machine: "MC-02", location: "Rack A2", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=NMB-0002" },
+      { code: "MACO-01", name: "PCB504A412G", category: "MACO", machine: "Line 1", location: "Rack B1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=MACO-01" },
+      { code: "MACO-02", name: "RCR504A052A", category: "MACO", machine: "Line 2", location: "Rack B2", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=MACO-02" },
+      { code: "ATH-001", name: "ATH Casing Assy", category: "ATH", machine: "Line 3", location: "Rack C1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dcfce7/166534?text=ATH-001" },
+      { code: "ATH-002", name: "ATH Casing Assy", category: "ATH", machine: "Line 4", location: "Rack C2", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=ATH-002" },
+      { code: "DIT-001", name: "DIT Housing Part", category: "DIT", machine: "Line 5", location: "Rack D1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ffe4e6/9f1239?text=DIT-001" },
+      { code: "DIT-002", name: "DIT Housing Part", category: "DIT", machine: "Line 6", location: "Rack D2", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ccfbf1/115e59?text=DIT-002" },
+      { code: "DTL-001", name: "DTL Casing Jig", category: "DTL", machine: "Line 7", location: "Rack E1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/e0f2fe/0369a1?text=DTL-001" },
+      { code: "JTOA-01", name: "JTOA Special Jig", category: "JTOA", machine: "Line 8", location: "Rack F1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fae8ff/86198f?text=JTOA-01" },
+      { code: "TSB-001", name: "TSB Standard Jig", category: "TSB", machine: "Line 9", location: "Rack G1", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/ecfccb/3f6212?text=TSB-001" }
     ];
 
-    let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs_v3")) || defaultJigs;
+    let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs_v4")) || defaultJigs;
     let currentCategory = "ทั้งหมด";
     let uploadedImageBase64 = "";
 
@@ -248,7 +267,63 @@
       document.getElementById("login-screen").style.display = "flex";
     }
 
-    // ฟังก์ชันอ่านและย่อขนาดรูปภาพอัตโนมัติ
+    // ฟังก์ชันอ่านไฟล์ Excel ที่อัปโหลดเข้ามา แล้วแปลงเป็นข้อมูลในระบบทันที
+    function importExcelFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          let importedCount = 0;
+          // วนลูปอ่านข้อมูลจากไฟล์ Excel (ข้าม 2 แถวแรกที่เป็นหัวตาราง)
+          for (let i = 2; i < json.length; i++) {
+            const row = json[i];
+            if (row && row[0]) {
+              const code = String(row[0] || "").trim();
+              const name = String(row[1] || "").trim() || "-";
+              const category = String(row[2] || "").trim() || "General";
+              const machine = String(row[3] || "").trim() || "-";
+              const note = String(row[6] || row[7] || "").trim() || "-";
+
+              if (code) {
+                // เชิงป้องกันไม่ให้ซ้ำ
+                const exists = jigsData.some(j => j.code === code);
+                if (!exists) {
+                  jigsData.unshift({
+                    code: code,
+                    name: name,
+                    category: category,
+                    machine: machine,
+                    location: "-",
+                    status: "พร้อมใช้งาน",
+                    note: note,
+                    image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
+                  });
+                  importedCount++;
+                }
+              }
+            }
+          }
+
+          localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
+          renderCategories();
+          filterJigs();
+          alert(`นำเข้าข้อมูลจาก Excel สำเร็จ! เพิ่มเข้ามาใหม่ ${importedCount} รายการ รวมทั้งหมด ${jigsData.length} รายการ`);
+        } catch (err) {
+          alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel กรุณาตรวจสอบรูปแบบไฟล์ค่ะ");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // ฟังก์ชันอ่านและย่อขนาดรูปภาพ
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -299,7 +374,9 @@
         container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #666; padding: 20px;'>ไม่พบข้อมูลจิ๊ก</p>";
         return;
       }
-      data.forEach((jig) => {
+      // แสดงผลสูงสุด 100 รายการแรกเพื่อความรวดเร็วในการเรนเดอร์หน้าจอ
+      const displayData = data.slice(0, 100);
+      displayData.forEach((jig) => {
         const realIndex = jigsData.findIndex(item => item.code === jig.code && item.name === jig.name);
 
         const card = document.createElement("div");
@@ -320,12 +397,18 @@
             </div>
           </div>
           <div class="card-actions">
-            <button class="btn btn-warning" onclick="openEditModal(${realIndex})">แก้ไข / เปลี่ยนรูป</button>
+            <button class="btn btn-warning" onclick="openEditModal(${realIndex})">แก้ไข</button>
             <button class="btn btn-danger" onclick="deleteJig(${realIndex})">ลบ</button>
           </div>
         `;
         container.appendChild(card);
       });
+      if (data.length > 100) {
+        const note = document.createElement("div");
+        note.style.cssText = "grid-column: 1/-1; text-align: center; color: #666; padding: 15px; font-style: italic;";
+        note.innerText = `* แสดงผล 100 รายการแรกจากทั้งหมด ${data.length} รายการ (สามารถใช้ช่องค้นหาเพื่อกรองดูรายการเฉพาะเจาะจงได้)`;
+        container.appendChild(note);
+      }
     }
 
     function filterJigs() {
@@ -361,7 +444,7 @@
 
     function openEditModal(index) {
       const jig = jigsData[index];
-      document.getElementById("modal-title").innerText = "แก้ไขข้อมูล / เปลี่ยนรูปภาพจิ๊ก";
+      document.getElementById("modal-title").innerText = "แก้ไขข้อมูลจิ๊ก";
       document.getElementById("edit-index").value = index;
       document.getElementById("input-image-file").value = "";
       uploadedImageBase64 = jig.image;
@@ -404,11 +487,11 @@
       }
 
       try {
-        localStorage.setItem("hayakawa_jigs_v3", JSON.stringify(jigsData));
+        localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
         closeModal();
         renderCategories();
         filterJigs();
-        alert("บันทึกข้อมูลและรูปภาพสำเร็จค่ะ!");
+        alert("บันทึกข้อมูลสำเร็จค่ะ!");
       } catch (err) {
         alert("พื้นที่เก็บข้อมูลเต็ม กรุณาลบรายการเก่าออกบางส่วนก่อนนะคะ");
       }
@@ -417,7 +500,7 @@
     function deleteJig(index) {
       if (confirm(`คุณต้องการลบจิ็กรหัส "${jigsData[index].code}" ใช่หรือไม่?`)) {
         jigsData.splice(index, 1);
-        localStorage.setItem("hayakawa_jigs_v3", JSON.stringify(jigsData));
+        localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
         renderCategories();
         filterJigs();
         alert("ลบข้อมูลเรียบร้อยแล้วค่ะ");
