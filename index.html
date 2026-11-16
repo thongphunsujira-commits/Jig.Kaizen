@@ -608,6 +608,25 @@
   </script>
 </body>
 </html>
+closeModal();
+    populateGroupDropdown();
+    populateTypeDropdown();
+    filterJigs();
+    alert("บันทึกข้อมูลเรียบร้อยค่ะ!");
+  }
+}
+
+function deleteJig(index) {
+  if (confirm(`คุณต้องการลบจักรหัส "${jigsData[index].code}" ใช่หรือไม่?`)) {
+    jigsData.splice(index, 1);
+    populateGroupDropdown();
+    populateTypeDropdown();
+    filterJigs();
+    alert("ลบข้อมูลเรียบร้อยแล้วค่ะ");
+  }
+}
+
+// --- เพิ่มโค้ดดึงข้อมูลตรงนี้ ให้อยู่ข้างในแท็ก script ---
 Promise.all([
   fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
   fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
@@ -624,3 +643,5 @@ Promise.all([
   // นำตัวแปร allData ไปใช้งานแสดงผลตารางต่อได้เลย
 })
 .catch(err => console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err));
+
+</script>
