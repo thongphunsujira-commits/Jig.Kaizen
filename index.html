@@ -250,7 +250,7 @@
       </div>
       <div class="form-group">
         <label>ชื่อจิ๊ก / Casing Name:</label>
-        <input type="text" id="input-name" placeholder="ชื่อชิ้นงานหรือ Model">
+        <input type="text" id="input-name" placeholder="ชื่อชิ้นงานหรือModel">
       </div>
       <div class="form-group">
         <label>กลุ่มลูกค้าหลัก (Customer Group):</label>
@@ -290,11 +290,17 @@
   <script>
     const SYSTEM_PASSWORD = "1234";
 
+    // ข้อมูลเริ่มต้นชุดใหญ่ (เพื่อให้เวลาเปิดเครื่องอื่น ข้อมูลจะแสดงทันทีไม่โล่งครับ)
     const defaultJigs = [
-      { code: "J18-0001", name: "SDR3080135-18", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "Niphon P.", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=J18-0001" }
+      { code: "ALV-SOL02-044", name: "615504600D", customerGroup: "AUTOLIV", category: "AUTOLIV GROUP", machine: "Assy'6", location: "-", status: "พร้อมใช้งาน", note: "POJCHARA T", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=ALV-SOL02-044" },
+      { code: "ALV-SOL02-043", name: "615504600D", customerGroup: "AUTOLIV", category: "AUTOLIV GROUP", machine: "Assy'6", location: "-", status: "พร้อมใช้งาน", note: "POJCHARA T", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=ALV-SOL02-043" },
+      { code: "ALV-SOL02-042", name: "615504600D", customerGroup: "AUTOLIV", category: "AUTOLIV GROUP", machine: "Assy'6", location: "-", status: "พร้อมใช้งาน", note: "POJCHARA T", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=ALV-SOL02-042" },
+      { code: "ALV-SOL02-041", name: "615504600D", customerGroup: "AUTOLIV", category: "AUTOLIV GROUP", machine: "Assy'4B", location: "-", status: "พร้อมใช้งาน", note: "POJCHARA T", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=ALV-SOL02-041" },
+      { code: "ALV-SOL02-040", name: "615504600D", customerGroup: "AUTOLIV", category: "AUTOLIV GROUP", machine: "Assy'6", location: "-", status: "พร้อมใช้งาน", note: "POJCHARA T", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=ALV-SOL02-040" },
+      { code: "J18-0001", name: "SDR3080135-18", customerGroup: "GENERAL / อื่นๆ", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "Niphon P.", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=J18-0001" }
     ];
 
-    let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs_v4")) || defaultJigs;
+    let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs_v5")) || defaultJigs;
     let uploadedImageBase64 = "";
 
     function detectCustomerGroup(jig) {
@@ -330,7 +336,7 @@
         }
       });
       if (updated) {
-        localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
+        localStorage.setItem("hayakawa_jigs_v5", JSON.stringify(jigsData));
       }
     }
 
@@ -416,7 +422,7 @@
             }
           }
 
-          localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
+          localStorage.setItem("hayakawa_jigs_v5", JSON.stringify(jigsData));
           populateGroupDropdown();
           populateTypeDropdown();
           filterJigs();
@@ -643,7 +649,7 @@
       }
 
       try {
-        localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
+        localStorage.setItem("hayakawa_jigs_v5", JSON.stringify(jigsData));
         closeModal();
         populateGroupDropdown();
         populateTypeDropdown();
@@ -657,7 +663,7 @@
     function deleteJig(index) {
       if (confirm(`คุณต้องการลบจิ๊กรหัส "${jigsData[index].code}" ใช่หรือไม่?`)) {
         jigsData.splice(index, 1);
-        localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
+        localStorage.setItem("hayakawa_jigs_v5", JSON.stringify(jigsData));
         populateGroupDropdown();
         populateTypeDropdown();
         filterJigs();
