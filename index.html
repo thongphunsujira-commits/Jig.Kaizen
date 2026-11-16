@@ -605,28 +605,7 @@
         alert("ลบข้อมูลเรียบร้อยแล้วค่ะ");
       }
     }
-  </script>
-</body>
-</html>
-closeModal();
-    populateGroupDropdown();
-    populateTypeDropdown();
-    filterJigs();
-    alert("บันทึกข้อมูลเรียบร้อยค่ะ!");
-  }
-}
-
-function deleteJig(index) {
-  if (confirm(`คุณต้องการลบจักรหัส "${jigsData[index].code}" ใช่หรือไม่?`)) {
-    jigsData.splice(index, 1);
-    populateGroupDropdown();
-    populateTypeDropdown();
-    filterJigs();
-    alert("ลบข้อมูลเรียบร้อยแล้วค่ะ");
-  }
-}
-
-// --- เพิ่มโค้ดดึงข้อมูลตรงนี้ ให้อยู่ข้างในแท็ก script ---
+    // --- โค้ดดึงข้อมูล Excel ทั้ง 2 ไฟล์มารวมกันอัตโนมัติ ---
 Promise.all([
   fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
   fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
@@ -640,8 +619,12 @@ Promise.all([
   
   const allData = data1.concat(data2);
   console.log("โหลดข้อมูลสำเร็จทั้งหมด:", allData.length);
-  // นำตัวแปร allData ไปใช้งานแสดงผลตารางต่อได้เลย
+  
+  // นำข้อมูลทั้งหมดไปใส่ในตัวแปรตารางของระบบ
+  window.jigsData = allData;
+  if (typeof filterJigs === 'function') filterJigs();
 })
 .catch(err => console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err));
-
-</script>
+  </script>
+</body>
+</html>
