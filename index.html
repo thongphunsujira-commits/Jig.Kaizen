@@ -4,127 +4,163 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jig Information System - Hayakawa</title>
-  <!-- SheetJS สำหรับอ่านไฟล์ Excel ได้โดยตรงบนเว็บ -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { margin: 0; background-color: #f4f6f9; color: #333; }
+    body { margin: 0; background-color: #f1f5f9; color: #1e293b; }
 
     /* หน้าจอใส่รหัสผ่าน (Login) */
     #login-screen {
       display: flex; justify-content: center; align-items: center; height: 100vh;
-      background-color: #e9ecef;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     }
     .login-box {
-      background: white; padding: 30px; border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 320px; text-align: center;
+      background: white; padding: 35px 30px; border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 340px; text-align: center;
     }
-    .login-box h2 { margin-top: 0; color: #2c3e50; font-size: 20px; }
+    .login-box h2 { margin-top: 0; color: #0f172a; font-size: 20px; }
     .login-box input {
-      width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc;
-      border-radius: 6px; font-size: 16px; text-align: center; letter-spacing: 2px;
+      width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #cbd5e1;
+      border-radius: 8px; font-size: 16px; text-align: center; letter-spacing: 3px;
     }
     .login-box button {
-      width: 100%; padding: 12px; background-color: #2c3e50; color: white;
-      border: none; border-radius: 6px; font-size: 16px; cursor: pointer;
+      width: 100%; padding: 12px; background-color: #2563eb; color: white;
+      border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s;
     }
-    .login-box button:hover { background-color: #1a252f; }
-    #error-msg { color: #d9534f; font-size: 14px; margin-top: 10px; display: none; }
+    .login-box button:hover { background-color: #1d4ed8; }
+    #error-msg { color: #dc2626; font-size: 14px; margin-top: 10px; display: none; }
 
     /* หน้าจอหลักแสดงรายการจิ๊ก */
-    #main-screen { display: none; padding: 20px; max-width: 1200px; margin: auto; padding-bottom: 60px; }
-    .header {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: white;
-      padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    .header h1 { margin: 0; font-size: 18px; color: #2c3e50; }
-    .action-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    #main-screen { display: none; padding: 20px; max-width: 1280px; margin: auto; padding-bottom: 70px; }
     
-    /* กล่องเลือกประเภทลูกค้า และช่องค้นหา */
-    .filter-select {
-      padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; color: #333; outline: none;
+    .header-panel {
+      background: white; padding: 18px 22px; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px;
+      border-left: 5px solid #2563eb;
     }
-    .search-box {
-      padding: 9px 12px; width: 200px; border: 1px solid #cbd5e1;
-      border-radius: 6px; font-size: 14px; outline: none;
+    .header-top {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 15px; padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
     }
+    .header-top h1 { margin: 0; font-size: 19px; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+    .count-badge {
+      background: #dbeafe; color: #1e40af; padding: 3px 10px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
+    }
+    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* แถบตัวกรอง 2 ชั้น + ช่องค้นหา */
+    .filter-bar {
+      display: grid; grid-template-columns: 1fr 1fr 1.2fr auto; gap: 10px; align-items: center;
+    }
+    @media (max-width: 900px) {
+      .filter-bar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .filter-bar { grid-template-columns: 1fr; }
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-group label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+    
+    .filter-select, .search-box {
+      padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+      font-size: 14px; background: #f8fafc; color: #1e293b; outline: none; width: 100%;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .filter-select:focus, .search-box:focus { border-color: #2563eb; background: white; }
+
     .btn {
-      padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+      padding: 9px 14px; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
     }
     .btn-primary { background: #2563eb; color: white; }
     .btn-primary:hover { background: #1d4ed8; }
     .btn-success { background: #16a34a; color: white; }
     .btn-success:hover { background: #15803d; }
-    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger { background: #dc2626; color: white; }
     .btn-danger:hover { background: #b91c1c; }
     .btn-warning { background: #f59e0b; color: white; }
     .btn-warning:hover { background: #d97706; }
-    .btn-excel { background: #0ea5e9; color: white; }
-    .btn-excel:hover { background: #0284c7; }
+    .btn-excel { background: #0284c7; color: white; }
+    .btn-excel:hover { background: #0369a1; }
+    .btn-reset { background: #e2e8f0; color: #475569; margin-top: 17px; }
+    .btn-reset:hover { background: #cbd5e1; }
+    @media (max-width: 900px) { .btn-reset { margin-top: 0; } }
 
     /* ป้ายบอกสถานะผู้ใช้งานมุมซ้ายล่าง */
     #user-status-badge {
-      position: fixed; bottom: 15px; left: 15px; background: #2c3e50; color: white;
-      padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 999; display: flex; align-items: center; gap: 6px;
+      position: fixed; bottom: 15px; left: 15px; background: #0f172a; color: white;
+      padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25); z-index: 999; display: flex; align-items: center; gap: 8px;
+      border: 1px solid #334155;
     }
     .status-dot {
-      width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%;
-      display: inline-block; box-shadow: 0 0 5px #22c55e;
+      width: 9px; height: 9px; background-color: #22c55e; border-radius: 50%;
+      display: inline-block; box-shadow: 0 0 6px #22c55e;
     }
 
     /* ตารางแสดงข้อมูลจิ๊ก */
     .jig-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
       gap: 20px;
-      margin-top: 15px;
     }
     .jig-card {
-      background: white; border-radius: 8px; overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #eee;
+      background: white; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
       display: flex; flex-direction: column; justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .jig-card img { width: 100%; height: 160px; object-fit: cover; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .jig-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+    .jig-card img { width: 100%; height: 155px; object-fit: cover; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
     .jig-card-body { padding: 15px; flex-grow: 1; }
-    .jig-code { font-weight: bold; color: #0056b3; font-size: 16px; margin-bottom: 4px; }
-    .jig-name { font-size: 14px; color: #333; font-weight: 600; margin-bottom: 10px; word-break: break-all; }
+    
+    /* ป้ายหมวดหมู่ 2 ชั้นบนการ์ด */
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+    .tag-group {
+      font-size: 11px; font-weight: 700; background: #dbeafe; color: #1e40af;
+      padding: 3px 8px; border-radius: 6px;
+    }
+    .tag-sub {
+      font-size: 11px; font-weight: 600; background: #f3e8ff; color: #6b21a8;
+      padding: 3px 8px; border-radius: 6px;
+    }
+
+    .jig-code { font-weight: 700; color: #0f172a; font-size: 16px; margin-bottom: 3px; }
+    .jig-name { font-size: 13px; color: #475569; font-weight: 500; margin-bottom: 10px; word-break: break-all; }
     
     .info-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-    .info-table td { padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
-    .info-label { font-weight: bold; color: #64748b; width: 35%; }
+    .info-table td { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+    .info-label { font-weight: 600; color: #64748b; width: 35%; }
     
-    .jig-cat-tag {
-      font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px;
-      border-radius: 10px; display: inline-block; margin-bottom: 8px;
-    }
     .status-badge {
-      padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold;
-      background: #d4edda; color: #155724; display: inline-block;
+      padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;
+      background: #dcfce7; color: #166534; display: inline-block;
     }
     .card-actions {
-      display: flex; gap: 8px; padding: 10px 15px; background: #f8fafc; border-top: 1px solid #eee;
+      display: flex; gap: 8px; padding: 10px 15px; background: #f8fafc; border-top: 1px solid #e2e8f0;
     }
     .card-actions button { flex: 1; padding: 6px; font-size: 12px; }
 
     /* Modal ฟอร์มเพิ่ม/แก้ไขข้อมูล */
     #modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+      background: rgba(15, 23, 42, 0.6); justify-content: center; align-items: center; z-index: 1000;
       overflow-y: auto; padding: 20px 0;
     }
     .modal-box {
-      background: white; padding: 25px; border-radius: 8px; width: 420px; max-width: 92%;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: auto;
+      background: white; padding: 25px; border-radius: 10px; width: 440px; max-width: 92%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25); margin: auto;
     }
-    .modal-box h3 { margin-top: 0; color: #2c3e50; }
+    .modal-box h3 { margin-top: 0; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
     .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #475569; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #334155; }
     .form-group input, .form-group select {
-      width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;
+      width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
     }
     .image-preview-box {
-      width: 100%; height: 130px; border: 2px dashed #cbd5e1; border-radius: 6px;
+      width: 100%; height: 120px; border: 2px dashed #cbd5e1; border-radius: 6px;
       display: flex; justify-content: center; align-items: center; overflow: hidden;
       margin-top: 6px; background: #f8fafc; color: #94a3b8; font-size: 13px;
     }
@@ -137,9 +173,9 @@
   <!-- 1. หน้าใส่รหัสผ่าน -->
   <div id="login-screen">
     <div class="login-box">
-      <h2>ระบบฐานข้อมูลจิ๊ก (Hayakawa)</h2>
-      <p style="font-size: 14px; color: #666;">กรุณากรอกรหัสผ่านเพื่อเข้าใช้งาน</p>
-      <input type="password" id="password-input" placeholder="รหัสผ่าน" onkeypress="handleKeyPress(event)">
+      <h2>Jig Information System</h2>
+      <p style="font-size: 14px; color: #64748b; margin-bottom: 5px;">Hayakawa Manufacturing (Thailand)</p>
+      <input type="password" id="password-input" placeholder="รหัสผ่านเข้าใช้งาน" onkeypress="handleKeyPress(event)">
       <button onclick="checkPassword()">เข้าสู่ระบบ</button>
       <div id="error-msg">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่ค่ะ</div>
     </div>
@@ -147,61 +183,86 @@
 
   <!-- 2. หน้าแสดงรายการจิ๊กและจัดการข้อมูล -->
   <div id="main-screen">
-    <div class="header">
-      <h1 id="header-title">ระบบจัดการจิ๊ก (Hayakawa)</h1>
-      <div class="action-bar">
-        <button class="btn btn-success" onclick="openAddModal()">+ เพิ่มจิ๊ก</button>
-        <!-- ปุ่มอัปโหลดไฟล์ Excel เพื่อดึงข้อมูลทั้งหมดเข้าเว็บแบบสดๆ -->
-        <label class="btn btn-excel" style="cursor: pointer; display: inline-flex; align-items: center;">
-          📁 นำเข้า Excel <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;" onchange="importExcelFile(event)">
-        </label>
-        
-        <!-- กล่องเลือกประเภทลูกค้า (Dropdown แยกประเภทให้ชัดเจนตามที่พี่เลี้ยงแนะนำ) -->
-        <select id="category-select" class="filter-select" onchange="filterJigs()">
-          <option value="ทั้งหมด">-- ทุกประเภทลูกค้า --</option>
-        </select>
+    <div class="header-panel">
+      <div class="header-top">
+        <h1>
+          ระบบฐานข้อมูลและการจัดการจิ๊ก (Hayakawa)
+          <span class="count-badge" id="total-badge">0 รายการ</span>
+        </h1>
+        <div class="top-actions">
+          <button class="btn btn-success" onclick="openAddModal()">+ เพิ่มจิ๊กใหม่</button>
+          <label class="btn btn-excel" style="cursor: pointer;">
+            📁 นำเข้า / อัปเดต Excel <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;" onchange="importExcelFile(event)">
+          </label>
+          <button class="btn btn-danger" onclick="logout()">ออกจากระบบ</button>
+        </div>
+      </div>
 
-        <input type="text" id="search-input" class="search-box" placeholder="ค้นหารหัส, ชื่อ, ลูกค้า..." onkeyup="filterJigs()">
-        <button class="btn btn-danger" onclick="logout()">ออก</button>
+      <!-- แถบตัวกรองแยกกลุ่มลูกค้า + แยกประเภท + ค้นหา -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>1. กลุ่มลูกค้าหลัก (Customer Group)</label>
+          <select id="group-select" class="filter-select" onchange="onGroupChange()">
+            <option value="ทั้งหมด">-- ทุกกลุ่มลูกค้า --</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>2. ประเภท / แผนกย่อย (Jig Type / Sub-Category)</label>
+          <select id="type-select" class="filter-select" onchange="filterJigs()">
+            <option value="ทั้งหมด">-- ทุกประเภท --</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>3. ค้นหาด่วน (รหัส, ชื่อชิ้นงาน, เครื่องจักร)</label>
+          <input type="text" id="search-input" class="search-box" placeholder="พิมพ์คำค้นหา..." onkeyup="filterJigs()">
+        </div>
+
+        <button class="btn btn-reset" onclick="resetFilters()" title="ล้างตัวกรองทั้งหมด">ล้างตัวกรอง</button>
       </div>
     </div>
 
     <!-- ตารางแสดงข้อมูลจิ๊ก -->
     <div class="jig-grid" id="jig-container"></div>
 
-    <!-- ป้ายแสดงผู้ใช้งานปัจจุบัน (Admin) ที่มุมซ้ายล่าง -->
+    <!-- ป้ายแสดงผู้ใช้งานปัจจุบัน -->
     <div id="user-status-badge">
       <span class="status-dot"></span> ผู้ใช้งาน: Admin
     </div>
   </div>
 
-  <!-- Modal สำหรับเพิ่ม / แก้ไขข้อมูล และอัปโหลดรูปภาพ -->
+  <!-- Modal สำหรับเพิ่ม / แก้ไขข้อมูล -->
   <div id="modal-overlay">
     <div class="modal-box">
       <h3 id="modal-title">เพิ่มข้อมูลจิ๊กใหม่</h3>
       <input type="hidden" id="edit-index">
       
       <div class="form-group">
-        <label>รูปภาพจิ๊ก (เลือกไฟล์รูป หรือ ถ่ายรูป):</label>
+        <label>รูปภาพจิ๊ก (อัปโหลดรูปภาพ):</label>
         <input type="file" id="input-image-file" accept="image/*" onchange="handleImageUpload(event)">
         <div class="image-preview-box" id="image-preview">ยังไม่ได้เลือกรูปภาพ (ใช้ภาพรหัสอัตโนมัติ)</div>
       </div>
 
       <div class="form-group">
         <label>รหัสจิ๊ก (Jig Code):</label>
-        <input type="text" id="input-code" placeholder="เช่น JA26-0001">
+        <input type="text" id="input-code" placeholder="เช่น ALV-SOL02-044">
       </div>
       <div class="form-group">
         <label>ชื่อจิ๊ก / Casing Name:</label>
-        <input type="text" id="input-name" placeholder="ชื่อชิ้นงานหรือ Casing">
+        <input type="text" id="input-name" placeholder="ชื่อชิ้นงานหรือ Model">
       </div>
       <div class="form-group">
-        <label>ชื่อลูกค้า / แผนก (Category):</label>
-        <input type="text" id="input-category" placeholder="เช่น THAI HONDA, NMB-L">
+        <label>กลุ่มลูกค้าหลัก (Customer Group):</label>
+        <input type="text" id="input-group" placeholder="เช่น AUTOLIV, NMB, HONDA (ปล่อยว่างระบบจัดให้เอง)">
+      </div>
+      <div class="form-group">
+        <label>ประเภท / ชื่อลูกค้าเต็ม (Jig Type / Category):</label>
+        <input type="text" id="input-category" placeholder="เช่น AUTOLIV GROUP, Solder, NMB-L">
       </div>
       <div class="form-group">
         <label>เครื่องจักร (Machine):</label>
-        <input type="text" id="input-machine" placeholder="ระบุเครื่องจักร">
+        <input type="text" id="input-machine" placeholder="ระบุเครื่องจักรหรือไลน์ผลิต">
       </div>
       <div class="form-group">
         <label>ตำแหน่งที่เก็บ (Location):</label>
@@ -230,15 +291,52 @@
     const SYSTEM_PASSWORD = "1234";
 
     const defaultJigs = [
-      { code: "J18-0001", name: "SDR3080135-18", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "Niphon P.", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=J18-0001" },
-      { code: "J18-0002", name: "4P385271-3", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/dbeafe/1e40af?text=J18-0002" },
-      { code: "J18-0003", name: "2P361961-1", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "-", image: "https://placehold.co/400x300/fef3c7/92400e?text=J18-0003" },
-      { code: "J18-0004", name: "503466", category: "SIIX BANGKOK", machine: "ASSY'3", location: "-", status: "พร้อมใช้งาน", note: "SIWARAT", image: "https://placehold.co/400x300/dcfce7/166534?text=J18-0004" },
-      { code: "J18-0005", name: "3P267526-1A", category: "DIT", machine: "ASSY'3", location: "-", status: "พร้อมใช้งาน", note: "SIWARAT", image: "https://placehold.co/400x300/f3e8ff/6b21a8?text=J18-0005" }
+      { code: "J18-0001", name: "SDR3080135-18", category: "SET", machine: "ASSY'1", location: "-", status: "พร้อมใช้งาน", note: "Niphon P.", image: "https://placehold.co/400x300/e2e8f0/1e293b?text=J18-0001" }
     ];
 
+    // ดึงข้อมูลจากความจำเดิมของเครื่อง (3,980 รายการอยู่ครบ!)
     let jigsData = JSON.parse(localStorage.getItem("hayakawa_jigs_v4")) || defaultJigs;
     let uploadedImageBase64 = "";
+
+    // ฟังก์ชันอัจฉริยะ: แยก "กลุ่มลูกค้าหลัก" อัตโนมัติจากชื่อลูกค้าหรือรหัสจิ๊ก
+    function detectCustomerGroup(jig) {
+      if (jig.customerGroup && jig.customerGroup.trim() !== "") {
+        return jig.customerGroup.trim().toUpperCase();
+      }
+      const cat = (jig.category || "").toUpperCase();
+      const code = (jig.code || "").toUpperCase();
+
+      if (cat.includes("AUTOLIV") || code.startsWith("ALV")) return "AUTOLIV";
+      if (cat.includes("NMB")) return "NMB";
+      if (cat.includes("TOSHIBA")) return "TOSHIBA";
+      if (cat.includes("HONDA")) return "THAI HONDA";
+      if (cat.includes("SIIX")) return "SIIX";
+      if (cat.includes("TAKATA")) return "TAKATA";
+      if (cat.includes("JSSJ")) return "JSSJ";
+      if (cat.includes("DAIKIN")) return "DAIKIN";
+      if (cat.includes("IPRO")) return "IPRO";
+      if (cat.includes("PASAP") || cat.includes("WAKASA")) return "PASAP";
+      if (cat === "" || cat === "-" || cat === "GENERAL") return "GENERAL / อื่นๆ";
+      
+      // ตัดคำแรกก่อนวงเล็บหรือขีดเพื่อให้ได้ชื่อกลุ่มที่สะอาดตา
+      const cleanName = cat.split("(")[0].split("-")[0].trim();
+      return cleanName || "GENERAL / อื่นๆ";
+    }
+
+    // จัดเตรียมข้อมูลกลุ่มลูกค้าให้ครบทุกรายการ
+    function normalizeAllData() {
+      let updated = false;
+      jigsData.forEach(jig => {
+        const detected = detectCustomerGroup(jig);
+        if (jig.customerGroup !== detected) {
+          jig.customerGroup = detected;
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
+      }
+    }
 
     function checkPassword() {
       const input = document.getElementById("password-input").value;
@@ -246,7 +344,9 @@
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("main-screen").style.display = "block";
         document.getElementById("error-msg").style.display = "none";
-        updateCategoryDropdown();
+        normalizeAllData();
+        populateGroupDropdown();
+        populateTypeDropdown();
         filterJigs();
       } else {
         document.getElementById("error-msg").style.display = "block";
@@ -263,10 +363,13 @@
       document.getElementById("login-screen").style.display = "flex";
     }
 
-    // ฟังก์ชันอ่านไฟล์ Excel ที่อัปโหลดเข้ามา แล้วแปลงเป็นข้อมูลในระบบทันที
+    // นำเข้าและอัปเดตข้อมูลจาก Excel (รองรับการอัปเดตรายการเดิมด้วย!)
     function importExcelFile(event) {
       const file = event.target.files[0];
       if (!file) return;
+
+      // ดึงชื่อไฟล์มาช่วยระบุประเภทได้ถ้าในตารางว่าง (เช่น ไฟล์ชื่อ Solder.xlsx)
+      const fileNameClean = file.name.replace(/\.[^/.]+$/, "").trim();
 
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -277,22 +380,28 @@
           const worksheet = workbook.Sheets[firstSheetName];
           const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-          let importedCount = 0;
+          let addedCount = 0;
+          let updatedCount = 0;
+
           for (let i = 2; i < json.length; i++) {
             const row = json[i];
             if (row && row[0]) {
               const code = String(row[0] || "").trim();
               const name = String(row[1] || "").trim() || "-";
-              const category = String(row[2] || "").trim() || "General";
+              const category = String(row[2] || "").trim() || fileNameClean || "General";
               const machine = String(row[3] || "").trim() || "-";
               const note = String(row[6] || row[7] || "").trim() || "-";
 
-              if (code) {
-                const exists = jigsData.some(j => j.code === code);
-                if (!exists) {
+              if (code && code !== "\\") {
+                const existingIndex = jigsData.findIndex(j => j.code === code);
+                const tempObj = { code, name, category, machine, note };
+                const group = detectCustomerGroup(tempObj);
+
+                if (existingIndex === -1) {
                   jigsData.unshift({
                     code: code,
                     name: name,
+                    customerGroup: group,
                     category: category,
                     machine: machine,
                     location: "-",
@@ -300,21 +409,157 @@
                     note: note,
                     image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
                   });
-                  importedCount++;
+                  addedCount++;
+                } else {
+                  // อัปเดตข้อมูลหมวดหมู่ให้ตรงตามไฟล์ล่าสุด
+                  jigsData[existingIndex].name = name;
+                  jigsData[existingIndex].customerGroup = group;
+                  jigsData[existingIndex].category = category;
+                  if (machine !== "-") jigsData[existingIndex].machine = machine;
+                  if (note !== "-") jigsData[existingIndex].note = note;
+                  updatedCount++;
                 }
               }
             }
           }
 
           localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
-          updateCategoryDropdown();
+          populateGroupDropdown();
+          populateTypeDropdown();
           filterJigs();
-          alert(`นำเข้าข้อมูลจาก Excel สำเร็จ! เพิ่มเข้ามาใหม่ ${importedCount} รายการ รวมทั้งหมด ${jigsData.length} รายการ`);
+          alert(`ประมวลผลไฟล์สำเร็จ!\n- เพิ่มรายการใหม่: ${addedCount} รายการ\n- อัปเดตข้อมูลเดิม: ${updatedCount} รายการ\nรวมทั้งหมดในระบบ: ${jigsData.length} รายการ`);
         } catch (err) {
           alert("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel กรุณาตรวจสอบรูปแบบไฟล์ค่ะ");
         }
+        event.target.value = "";
       };
       reader.readAsArrayBuffer(file);
+    }
+
+    // สร้างตัวเลือกช่องที่ 1: กลุ่มลูกค้าหลัก
+    function populateGroupDropdown() {
+      const groups = ["ทั้งหมด", ...new Set(jigsData.map(j => j.customerGroup || detectCustomerGroup(j)))].sort();
+      const select = document.getElementById("group-select");
+      const currentVal = select.value;
+
+      select.innerHTML = "";
+      groups.forEach(grp => {
+        const opt = document.createElement("option");
+        opt.value = grp;
+        opt.innerText = grp === "ทั้งหมด" ? "-- ทุกกลุ่มลูกค้า --" : grp;
+        select.appendChild(opt);
+      });
+      if (groups.includes(currentVal)) select.value = currentVal;
+    }
+
+    // สร้างตัวเลือกช่องที่ 2: ประเภทย่อย (กรองตามกลุ่มลูกค้าที่เลือกในช่อง 1 อัตโนมัติ!)
+    function populateTypeDropdown() {
+      const selectedGroup = document.getElementById("group-select").value;
+      const relevantJigs = selectedGroup === "ทั้งหมด" 
+        ? jigsData 
+        : jigsData.filter(j => (j.customerGroup || detectCustomerGroup(j)) === selectedGroup);
+
+      const types = ["ทั้งหมด", ...new Set(relevantJigs.map(j => j.category))].sort();
+      const select = document.getElementById("type-select");
+      const currentVal = select.value;
+
+      select.innerHTML = "";
+      types.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.innerText = t === "ทั้งหมด" ? "-- ทุกประเภท / แผนก --" : t;
+        select.appendChild(opt);
+      });
+      if (types.includes(currentVal)) {
+        select.value = currentVal;
+      } else {
+        select.value = "ทั้งหมด";
+      }
+    }
+
+    function onGroupChange() {
+      populateTypeDropdown();
+      filterJigs();
+    }
+
+    function resetFilters() {
+      document.getElementById("group-select").value = "ทั้งหมด";
+      populateTypeDropdown();
+      document.getElementById("type-select").value = "ทั้งหมด";
+      document.getElementById("search-input").value = "";
+      filterJigs();
+    }
+
+    function renderJigs(data) {
+      const container = document.getElementById("jig-container");
+      container.innerHTML = "";
+      document.getElementById("total-badge").innerText = `แสดง ${data.length} / ${jigsData.length} รายการ`;
+
+      if (data.length === 0) {
+        container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #64748b; padding: 40px; background: white; border-radius: 8px;'>ไม่พบข้อมูลจิ๊กตามเงื่อนไขที่เลือกค่ะ</p>";
+        return;
+      }
+
+      const displayData = data.slice(0, 100);
+      displayData.forEach((jig) => {
+        const realIndex = jigsData.findIndex(item => item.code === jig.code && item.name === jig.name);
+        const groupName = jig.customerGroup || detectCustomerGroup(jig);
+
+        const card = document.createElement("div");
+        card.className = "jig-card";
+        card.innerHTML = `
+          <div>
+            <img src="${jig.image}" alt="${jig.code}">
+            <div class="jig-card-body">
+              <div class="tag-row">
+                <span class="tag-group">กลุ่ม: ${groupName}</span>
+                <span class="tag-sub">ประเภท: ${jig.category}</span>
+              </div>
+              <div class="jig-code">${jig.code}</div>
+              <div class="jig-name">${jig.name}</div>
+              <table class="info-table">
+                <tr><td class="info-label">เครื่องจักร:</td><td>${jig.machine}</td></tr>
+                <tr><td class="info-label">ตำแหน่ง:</td><td>${jig.location}</td></tr>
+                <tr><td class="info-label">สถานะ:</td><td><span class="status-badge">${jig.status}</span></td></tr>
+                <tr><td class="info-label">หมายเหตุ:</td><td>${jig.note}</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-warning" onclick="openEditModal(${realIndex})">แก้ไข</button>
+            <button class="btn btn-danger" onclick="deleteJig(${realIndex})">ลบ</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (data.length > 100) {
+        const note = document.createElement("div");
+        note.style.cssText = "grid-column: 1/-1; text-align: center; color: #64748b; padding: 15px; font-size: 13px; background: white; border-radius: 8px;";
+        note.innerText = `* แสดงผล 100 รายการแรกจากทั้งหมด ${data.length} รายการ (สามารถเลือกกลุ่มลูกค้า ประเภท หรือพิมพ์ค้นหาเพื่อดูรายการที่ต้องการได้ทันทีค่ะ)`;
+        container.appendChild(note);
+      }
+    }
+
+    function filterJigs() {
+      const selectedGroup = document.getElementById("group-select").value;
+      const selectedType = document.getElementById("type-select").value;
+      const keyword = document.getElementById("search-input").value.toLowerCase();
+      
+      const filtered = jigsData.filter(jig => {
+        const groupName = jig.customerGroup || detectCustomerGroup(jig);
+        const matchGroup = (selectedGroup === "ทั้งหมด" || groupName === selectedGroup);
+        const matchType = (selectedType === "ทั้งหมด" || jig.category === selectedType);
+        const matchKeyword = (
+          jig.code.toLowerCase().includes(keyword) ||
+          jig.name.toLowerCase().includes(keyword) ||
+          jig.category.toLowerCase().includes(keyword) ||
+          groupName.toLowerCase().includes(keyword) ||
+          jig.machine.toLowerCase().includes(keyword)
+        );
+        return matchGroup && matchType && matchKeyword;
+      });
+      renderJigs(filtered);
     }
 
     function handleImageUpload(event) {
@@ -342,84 +587,6 @@
       reader.readAsDataURL(file);
     }
 
-    function updateCategoryDropdown() {
-      const categories = ["ทั้งหมด", ...new Set(jigsData.map(j => j.category))].sort();
-      const select = document.getElementById("category-select");
-      const currentVal = select.value;
-      
-      select.innerHTML = "";
-      categories.forEach(cat => {
-        const opt = document.createElement("option");
-        opt.value = cat;
-        opt.innerText = cat === "ทั้งหมด" ? "-- ทุกประเภทลูกค้า --" : cat;
-        select.appendChild(opt);
-      });
-      if (categories.includes(currentVal)) {
-        select.value = currentVal;
-      }
-    }
-
-    function renderJigs(data) {
-      const container = document.getElementById("jig-container");
-      container.innerHTML = "";
-      document.getElementById("header-title").innerText = `ระบบจัดการจิ๊ก (Hayakawa) - แสดง ${data.length} รายการ`;
-      if (data.length === 0) {
-        container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #666; padding: 20px;'>ไม่พบข้อมูลจิ๊ก</p>";
-        return;
-      }
-      const displayData = data.slice(0, 100);
-      displayData.forEach((jig) => {
-        const realIndex = jigsData.findIndex(item => item.code === jig.code && item.name === jig.name);
-
-        const card = document.createElement("div");
-        card.className = "jig-card";
-        card.innerHTML = `
-          <div>
-            <img src="${jig.image}" alt="${jig.code}">
-            <div class="jig-card-body">
-              <span class="jig-cat-tag">ลูกค้า: ${jig.category}</span>
-              <div class="jig-code">${jig.code}</div>
-              <div class="jig-name">${jig.name}</div>
-              <table class="info-table">
-                <tr><td class="info-label">เครื่องจักร:</td><td>${jig.machine}</td></tr>
-                <tr><td class="info-label">ตำแหน่ง:</td><td>${jig.location}</td></tr>
-                <tr><td class="info-label">สถานะ:</td><td><span class="status-badge">${jig.status}</span></td></tr>
-                <tr><td class="info-label">หมายเหตุ:</td><td>${jig.note}</td></tr>
-              </table>
-            </div>
-          </div>
-          <div class="card-actions">
-            <button class="btn btn-warning" onclick="openEditModal(${realIndex})">แก้ไข</button>
-            <button class="btn btn-danger" onclick="deleteJig(${realIndex})">ลบ</button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-      if (data.length > 100) {
-        const note = document.createElement("div");
-        note.style.cssText = "grid-column: 1/-1; text-align: center; color: #666; padding: 15px; font-style: italic;";
-        note.innerText = `* แสดงผล 100 รายการแรกจากทั้งหมด ${data.length} รายการ (สามารถใช้ช่องค้นหาเพื่อกรองดูรายการเฉพาะเจาะจงได้)`;
-        container.appendChild(note);
-      }
-    }
-
-    function filterJigs() {
-      const selectedCategory = document.getElementById("category-select").value;
-      const keyword = document.getElementById("search-input").value.toLowerCase();
-      
-      const filtered = jigsData.filter(jig => {
-        const matchCategory = (selectedCategory === "ทั้งหมด" || jig.category === selectedCategory);
-        const matchKeyword = (
-          jig.code.toLowerCase().includes(keyword) ||
-          jig.name.toLowerCase().includes(keyword) ||
-          jig.category.toLowerCase().includes(keyword) ||
-          jig.machine.toLowerCase().includes(keyword)
-        );
-        return matchCategory && matchKeyword;
-      });
-      renderJigs(filtered);
-    }
-
     function openAddModal() {
       document.getElementById("modal-title").innerText = "เพิ่มข้อมูลจิ๊กใหม่";
       document.getElementById("edit-index").value = "";
@@ -428,6 +595,7 @@
       document.getElementById("image-preview").innerHTML = "ยังไม่ได้เลือกรูปภาพ (ใช้ภาพรหัสอัตโนมัติ)";
       document.getElementById("input-code").value = "";
       document.getElementById("input-name").value = "";
+      document.getElementById("input-group").value = "";
       document.getElementById("input-category").value = "";
       document.getElementById("input-machine").value = "";
       document.getElementById("input-location").value = "";
@@ -445,6 +613,7 @@
       document.getElementById("image-preview").innerHTML = `<img src="${jig.image}" alt="Preview">`;
       document.getElementById("input-code").value = jig.code;
       document.getElementById("input-name").value = jig.name;
+      document.getElementById("input-group").value = jig.customerGroup || detectCustomerGroup(jig);
       document.getElementById("input-category").value = jig.category;
       document.getElementById("input-machine").value = jig.machine;
       document.getElementById("input-location").value = jig.location;
@@ -462,6 +631,7 @@
       const code = document.getElementById("input-code").value.trim();
       const name = document.getElementById("input-name").value.trim();
       const category = document.getElementById("input-category").value.trim() || "General";
+      const rawGroup = document.getElementById("input-group").value.trim();
       const machine = document.getElementById("input-machine").value.trim() || "-";
       const location = document.getElementById("input-location").value.trim() || "-";
       const status = document.getElementById("input-status").value;
@@ -472,18 +642,20 @@
         return;
       }
 
+      const customerGroup = rawGroup ? rawGroup.toUpperCase() : detectCustomerGroup({ code, category });
       const finalImage = uploadedImageBase64 || `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`;
 
       if (editIndex === "") {
-        jigsData.unshift({ code, name, category, machine, location, status, note, image: finalImage });
+        jigsData.unshift({ code, name, customerGroup, category, machine, location, status, note, image: finalImage });
       } else {
-        jigsData[editIndex] = { code, name, category, machine, location, status, note, image: finalImage };
+        jigsData[editIndex] = { code, name, customerGroup, category, machine, location, status, note, image: finalImage };
       }
 
       try {
         localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
         closeModal();
-        updateCategoryDropdown();
+        populateGroupDropdown();
+        populateTypeDropdown();
         filterJigs();
         alert("บันทึกข้อมูลสำเร็จค่ะ!");
       } catch (err) {
@@ -492,10 +664,11 @@
     }
 
     function deleteJig(index) {
-      if (confirm(`คุณต้องการลบจิ็กรหัส "${jigsData[index].code}" ใช่หรือไม่?`)) {
+      if (confirm(`คุณต้องการลบจิ๊กรหัส "${jigsData[index].code}" ใช่หรือไม่?`)) {
         jigsData.splice(index, 1);
         localStorage.setItem("hayakawa_jigs_v4", JSON.stringify(jigsData));
-        updateCategoryDropdown();
+        populateGroupDropdown();
+        populateTypeDropdown();
         filterJigs();
         alert("ลบข้อมูลเรียบร้อยแล้วค่ะ");
       }
