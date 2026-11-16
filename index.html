@@ -608,7 +608,6 @@
   </script>
 </body>
 </html>
-// โค้ดดึงข้อมูล Excel ทั้ง 2 ไฟล์มารวมกันอัตโนมัติ
 Promise.all([
   fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
   fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
@@ -620,10 +619,8 @@ Promise.all([
   const data1 = XLSX.utils.sheet_to_json(workbook1.Sheets[workbook1.SheetNames[0]]);
   const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]]);
   
-  // รวมข้อมูลทั้งสองไฟล์เข้าด้วยกัน
   const allData = data1.concat(data2);
-  
-  // นำข้อมูล allData ไปแสดงในตารางของคุณป๊อปต่อได้ทันที
   console.log("โหลดข้อมูลสำเร็จทั้งหมด:", allData.length);
+  // นำตัวแปร allData ไปใช้งานแสดงผลตารางต่อได้เลย
 })
 .catch(err => console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err));
