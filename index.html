@@ -621,7 +621,13 @@
     const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]]);
     
     const allData = data1.concat(data2);
+  
     window.jigsData = allData;
+    
+    // --- นำบรรทัดนี้มาวางแทรกตรงนี้ค่ะ ---
+    const loadingEl = document.getElementById('loadingOverlay') || document.querySelector('.loading-overlay');
+    if (loadingEl) loadingEl.style.display = 'none';
+
     if (typeof filterJigs === 'function') filterJigs();
   })
   .catch(err => console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err));
