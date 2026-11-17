@@ -568,7 +568,7 @@
       }
     }
 
-    // โหลดไฟล์ Excel ทั้ง 2 พาร์ทพร้อมกันอัตโนมัติ
+    // ฟังก์ชันกวาดข้อมูลทุกแถวและทุกคอลัมน์จากทั้ง 2 ไฟล์ Excel มาแสดงผลอัตโนมัติ
     Promise.all([
       fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
       fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
@@ -581,16 +581,28 @@
       const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]], {header: 1});
 
       let loadedJigs = [];
-      
-      // ประมวลผลไฟล์พาร์ทที่ 1 (เริ่มจากแถวที่ 2 ข้ามหัวตาราง)
-      for (let i = 2; i < data1.length; i++) {
-        const row = data1[i];
-        if (row && row[0]) {
-          const code = String(row[0] || "").trim();
-          const name = String(row[1] || "").trim() || "-";
-          const category = String(row[2] || "").trim() || "General";
-          const machine = String(row[3] || "").trim() || "-";
-          const note = String(row[6] || row[7] || "").trim() || "-";
+
+      function parseRows(rows) {
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length === 0) continue;
+
+          // หาช่องที่มีข้อความหรือรหัส (กวาดทุกคอลัมน์ในแถวเพื่อหาค่าที่เป็นไปได้)
+          let validCols = row.map(cell => String(cell || "").trim()).filter(val => val !== "" && val !== "undefined");
+          if (validCols.length === 0) continue;
+
+          // ข้ามแถวที่เป็นหัวตาราง (Header)
+          const firstVal = validCols[0].toLowerCase();
+          if (firstVal.includes("code") || firstVal.includes("รหัส") || firstVal.includes("ลำดับ") || firstVal.includes("no")) {
+            continue;
+          }
+
+          // ดึงค่าจากคอลัมน์แรกๆ มาเป็นรหัสและชื่อ
+          const code = validCols[0];
+          const name = validCols[1] || validCols[0];
+          const category = validCols[2] || "General";
+          const machine = validCols[3] || "-";
+          const note = validCols[4] || "-";
 
           if (code && code !== "\\") {
             const tempObj = { code, name, category, machine, note };
@@ -604,39 +616,14 @@
               location: "-",
               status: "พร้อมใช้งาน",
               note: note,
-              image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
+              image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(code)}`
             });
           }
         }
       }
 
-      // ประมวลผลไฟล์พาร์ทที่ 2
-      for (let i = 2; i < data2.length; i++) {
-        const row = data2[i];
-        if (row && row[0]) {
-          const code = String(row[0] || "").trim();
-          const name = String(row[1] || "").trim() || "-";
-          const category = String(row[2] || "").trim() || "General";
-          const machine = String(row[3] || "").trim() || "-";
-          const note = String(row[6] || row[7] || "").trim() || "-";
-
-          if (code && code !== "\\") {
-            const tempObj = { code, name, category, machine, note };
-            const group = detectCustomerGroup(tempObj);
-            loadedJigs.push({
-              code: code,
-              name: name,
-              customerGroup: group,
-              category: category,
-              machine: machine,
-              location: "-",
-              status: "พร้อมใช้งาน",
-              note: note,
-              image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
-            });
-          }
-        }
-      }
+      parseRows(data1);
+      parseRows(data2);
 
       jigsData = loadedJigs;
       populateGroupDropdown();
@@ -645,7 +632,7 @@
     })
     .catch(err => {
       console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err);
-      alert("ไม่สามารถโหลดไฟล์ jig_data_part1.xlsx หรือ jig_data_part2.xlsx ได้ กรุณาตรวจสอบชื่อไฟล์บน GitHub ครับ");
+      alert("ไม่สามารถโหลดไฟล์ Excel ได้ กรุณาตรวจสอบชื่อไฟล์ jig_data_part1.xlsx และ jig_data_part2.xlsx บน GitHub ค่ะ");
     });
   </script>
 </body>
