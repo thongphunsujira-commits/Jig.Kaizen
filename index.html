@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <style>
-    /* สั่งซ่อนหน้าต่างโหลดนี้ถาวร */
+    /* สั่งซ่อนหน้าจอโหลดนี้ถาวร */
     .loading-overlay, #loadingOverlay, #loading-overlay, div:has(> * > img[src*="hourglass"]) {
       display: none !important;
     }
@@ -568,7 +568,7 @@
       }
     }
 
-    // โหลดไฟล์ Excel 2 พาร์ทอัตโนมัติทันทีที่เปิดเว็บ
+    // โหลดไฟล์ Excel ทั้ง 2 พาร์ทพร้อมกันอัตโนมัติ
     Promise.all([
       fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
       fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
@@ -577,86 +577,75 @@
       const workbook1 = XLSX.read(buffer1, {type: 'array'});
       const workbook2 = XLSX.read(buffer2, {type: 'array'});
 
-      const data1 = XLSX.utils.sheet_to_json(workbook1.Sheets[workbook1.SheetNames[0]]);
-      const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]]);
+      const data1 = XLSX.utils.sheet_to_json(workbook1.Sheets[workbook1.SheetNames[0]], {header: 1});
+      const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]], {header: 1});
 
-      const allData = data1.concat(data2);
-      
       let loadedJigs = [];
-      allData.forEach(row => {
-        const code = String(row[0] || "").trim();
-        const name = String(row[1] || "").trim() || "-";
-        const category = String(row[2] || "").trim() || "General";
-        const machine = String(row[3] || "").trim() || "-";
-        const note = String(row[6] || row[7] || "").trim() || "-";
+      
+      // ประมวลผลไฟล์พาร์ทที่ 1 (เริ่มจากแถวที่ 2 ข้ามหัวตาราง)
+      for (let i = 2; i < data1.length; i++) {
+        const row = data1[i];
+        if (row && row[0]) {
+          const code = String(row[0] || "").trim();
+          const name = String(row[1] || "").trim() || "-";
+          const category = String(row[2] || "").trim() || "General";
+          const machine = String(row[3] || "").trim() || "-";
+          const note = String(row[6] || row[7] || "").trim() || "-";
 
-        if (code && code !== "\\") {
-          const tempObj = { code, name, category, machine, note };
-          const group = detectCustomerGroup(tempObj);
-          loadedJigs.push({
-            code: code,
-            name: name,
-            customerGroup: group,
-            category: category,
-            machine: machine,
-            location: "-",
-            status: "พร้อมใช้งาน",
-            note: note,
-            image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
-          });
+          if (code && code !== "\\") {
+            const tempObj = { code, name, category, machine, note };
+            const group = detectCustomerGroup(tempObj);
+            loadedJigs.push({
+              code: code,
+              name: name,
+              customerGroup: group,
+              category: category,
+              machine: machine,
+              location: "-",
+              status: "พร้อมใช้งาน",
+              note: note,
+              image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
+            });
+          }
         }
-      });
+      }
+
+      // ประมวลผลไฟล์พาร์ทที่ 2
+      for (let i = 2; i < data2.length; i++) {
+        const row = data2[i];
+        if (row && row[0]) {
+          const code = String(row[0] || "").trim();
+          const name = String(row[1] || "").trim() || "-";
+          const category = String(row[2] || "").trim() || "General";
+          const machine = String(row[3] || "").trim() || "-";
+          const note = String(row[6] || row[7] || "").trim() || "-";
+
+          if (code && code !== "\\") {
+            const tempObj = { code, name, category, machine, note };
+            const group = detectCustomerGroup(tempObj);
+            loadedJigs.push({
+              code: code,
+              name: name,
+              customerGroup: group,
+              category: category,
+              machine: machine,
+              location: "-",
+              status: "พร้อมใช้งาน",
+              note: note,
+              image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
+            });
+          }
+        }
+      }
 
       jigsData = loadedJigs;
-      
-      // ซ่อนหน้าจอโหลด
-      const overlay = document.getElementById('loading-overlay');
-      if (overlay) overlay.style.display = 'none';
-
       populateGroupDropdown();
       populateTypeDropdown();
       filterJigs();
     })
     .catch(err => {
       console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err);
-      // ลองโหลดจาก jig_data.xlsx เดี่ยวๆ เผื่อกรณีสำรอง
-      fetch('jig_data.xlsx')
-        .then(res => res.arrayBuffer())
-        .then(buffer => {
-          const wb = XLSX.read(buffer, {type: 'array'});
-          const ws = wb.Sheets[wb.SheetNames[0]];
-          const json = XLSX.utils.sheet_to_json(ws, {header: 1});
-          let loadedJigs = [];
-          for (let i = 2; i < json.length; i++) {
-            const row = json[i];
-            if (row && row[0]) {
-              const code = String(row[0] || "").trim();
-              const name = String(row[1] || "").trim() || "-";
-              const category = String(row[2] || "").trim() || "General";
-              const machine = String(row[3] || "").trim() || "-";
-              const note = String(row[6] || row[7] || "").trim() || "-";
-              if (code && code !== "\\") {
-                const tempObj = { code, name, category, machine, note };
-                const group = detectCustomerGroup(tempObj);
-                loadedJigs.push({
-                  code, name, customerGroup: group, category, machine, location: "-", status: "พร้อมใช้งาน", note,
-                  image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
-                });
-              }
-            }
-          }
-          jigsData = loadedJigs;
-          const overlay = document.getElementById('loading-overlay');
-          if (overlay) overlay.style.display = 'none';
-          populateGroupDropdown();
-          populateTypeDropdown();
-          filterJigs();
-        })
-        .catch(e => {
-          alert("ไม่พบไฟล์ Excel ใน GitHub กรุณาตรวจสอบชื่อไฟล์ jig_data_part1.xlsx และ jig_data_part2.xlsx ครับ");
-          const overlay = document.getElementById('loading-overlay');
-          if (overlay) overlay.style.display = 'none';
-        });
+      alert("ไม่สามารถโหลดไฟล์ jig_data_part1.xlsx หรือ jig_data_part2.xlsx ได้ กรุณาตรวจสอบชื่อไฟล์บน GitHub ครับ");
     });
   </script>
 </body>
