@@ -2,11 +2,11 @@
 <html lang="th">
 <head>
   <style>
-  /* สั่งซ่อนหน้าต่างโหลดนี้ถาวร */
-  .loading-overlay, #loadingOverlay, div:has(> * > img[src*="hourglass"]) {
-    display: none !important;
-  }
-</style>
+    /* สั่งซ่อนหน้าต่างโหลดนี้ถาวร */
+    .loading-overlay, #loadingOverlay, #loading-overlay, div:has(> * > img[src*="hourglass"]) {
+      display: none !important;
+    }
+  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jig Kaizen - Hayakawa Thailand</title>
@@ -36,9 +36,10 @@
     }
     .login-box button:hover { background-color: #1d4ed8; }
     #error-msg { color: #dc2626; font-size: 14px; margin-top: 10px; display: none; }
+    
     #loading-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.8); display: flex; flex-direction: column;
+      background: rgba(15, 23, 42, 0.8); display: none !important; flex-direction: column;
       justify-content: center; align-items: center; color: white; z-index: 9999; font-size: 18px;
     }
 
@@ -303,51 +304,6 @@
     let jigsData = [];
     let uploadedImageBase64 = "";
 
-    // โหลดไฟล์ Excel อัตโนมัติจาก GitHub ทันทีที่เปิดเว็บ
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const response = await fetch('jig_data.xlsx');
-        const arrayBuffer = await response.arrayBuffer();
-        const data = new Uint8Array(arrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        let loadedJigs = [];
-        for (let i = 2; i < json.length; i++) {
-          const row = json[i];
-          if (row && row[0]) {
-            const code = String(row[0] || "").trim();
-            const name = String(row[1] || "").trim() || "-";
-            const category = String(row[2] || "").trim() || "General";
-            const machine = String(row[3] || "").trim() || "-";
-            const note = String(row[6] || row[7] || "").trim() || "-";
-
-            if (code && code !== "\\") {
-              const tempObj = { code, name, category, machine, note };
-              const group = detectCustomerGroup(tempObj);
-              loadedJigs.push({
-                code: code,
-                name: name,
-                customerGroup: group,
-                category: category,
-                machine: machine,
-                location: "-",
-                status: "พร้อมใช้งาน",
-                note: note,
-                image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
-              });
-            }
-          }
-        }
-        jigsData = loadedJigs;
-        document.getElementById('loading-overlay').style.display = 'none';
-      } catch (err) {
-        alert("ไม่พบไฟล์ jig_data.xlsx ใน GitHub กรุณาอัปโหลดไฟล์ Excel ไปที่หน้า GitHub ของโปรเจกต์ค่ะ");
-        document.getElementById('loading-overlay').style.display = 'none';
-      }
-    });
-
     function detectCustomerGroup(jig) {
       if (jig.customerGroup && jig.customerGroup.trim() !== "") {
         return jig.customerGroup.trim().toUpperCase();
@@ -611,33 +567,97 @@
         alert("ลบข้อมูลเรียบร้อยแล้วค่ะ");
       }
     }
-    }
-  }
-Promise.all([
-  fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
-  fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
-])
-.then(([buffer1, buffer2]) => {
-  const workbook1 = XLSX.read(buffer1, {type: 'array'});
-  const workbook2 = XLSX.read(buffer2, {type: 'array'});
 
-  const data1 = XLSX.utils.sheet_to_json(workbook1.Sheets[workbook1.SheetNames[0]]);
-  const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]]);
+    // โหลดไฟล์ Excel 2 พาร์ทอัตโนมัติทันทีที่เปิดเว็บ
+    Promise.all([
+      fetch('jig_data_part1.xlsx').then(res => res.arrayBuffer()),
+      fetch('jig_data_part2.xlsx').then(res => res.arrayBuffer())
+    ])
+    .then(([buffer1, buffer2]) => {
+      const workbook1 = XLSX.read(buffer1, {type: 'array'});
+      const workbook2 = XLSX.read(buffer2, {type: 'array'});
 
-  const allData = data1.concat(data2);
-  window.jigsData = allData;
+      const data1 = XLSX.utils.sheet_to_json(workbook1.Sheets[workbook1.SheetNames[0]]);
+      const data2 = XLSX.utils.sheet_to_json(workbook2.Sheets[workbook2.SheetNames[0]]);
 
-  // ซ่อนหน้าจอโหลดทุกรูปแบบที่มีข้อความ "กำลังโหลดฐานข้อมูล"
-  document.querySelectorAll('#loadingOverlay, .loading-overlay, #loading, .loading, #loader, .loader').forEach(el => {
-    el.style.display = 'none';
-  });
-  document.querySelectorAll('*').forEach(el => {
-    if (el.innerText && el.innerText.includes('กำลังโหลดฐานข้อมูล')) {
-      el.style.display = 'none';
-    }
-  });
+      const allData = data1.concat(data2);
+      
+      let loadedJigs = [];
+      allData.forEach(row => {
+        const code = String(row[0] || "").trim();
+        const name = String(row[1] || "").trim() || "-";
+        const category = String(row[2] || "").trim() || "General";
+        const machine = String(row[3] || "").trim() || "-";
+        const note = String(row[6] || row[7] || "").trim() || "-";
 
-  if (typeof filterJigs === 'function') filterJigs();
-})
-.catch(err => console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err));
+        if (code && code !== "\\") {
+          const tempObj = { code, name, category, machine, note };
+          const group = detectCustomerGroup(tempObj);
+          loadedJigs.push({
+            code: code,
+            name: name,
+            customerGroup: group,
+            category: category,
+            machine: machine,
+            location: "-",
+            status: "พร้อมใช้งาน",
+            note: note,
+            image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
+          });
+        }
+      });
+
+      jigsData = loadedJigs;
+      
+      // ซ่อนหน้าจอโหลด
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) overlay.style.display = 'none';
+
+      populateGroupDropdown();
+      populateTypeDropdown();
+      filterJigs();
+    })
+    .catch(err => {
+      console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err);
+      // ลองโหลดจาก jig_data.xlsx เดี่ยวๆ เผื่อกรณีสำรอง
+      fetch('jig_data.xlsx')
+        .then(res => res.arrayBuffer())
+        .then(buffer => {
+          const wb = XLSX.read(buffer, {type: 'array'});
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(ws, {header: 1});
+          let loadedJigs = [];
+          for (let i = 2; i < json.length; i++) {
+            const row = json[i];
+            if (row && row[0]) {
+              const code = String(row[0] || "").trim();
+              const name = String(row[1] || "").trim() || "-";
+              const category = String(row[2] || "").trim() || "General";
+              const machine = String(row[3] || "").trim() || "-";
+              const note = String(row[6] || row[7] || "").trim() || "-";
+              if (code && code !== "\\") {
+                const tempObj = { code, name, category, machine, note };
+                const group = detectCustomerGroup(tempObj);
+                loadedJigs.push({
+                  code, name, customerGroup: group, category, machine, location: "-", status: "พร้อมใช้งาน", note,
+                  image: `https://placehold.co/400x300/e2e8f0/1e293b?text=${code}`
+                });
+              }
+            }
+          }
+          jigsData = loadedJigs;
+          const overlay = document.getElementById('loading-overlay');
+          if (overlay) overlay.style.display = 'none';
+          populateGroupDropdown();
+          populateTypeDropdown();
+          filterJigs();
+        })
+        .catch(e => {
+          alert("ไม่พบไฟล์ Excel ใน GitHub กรุณาตรวจสอบชื่อไฟล์ jig_data_part1.xlsx และ jig_data_part2.xlsx ครับ");
+          const overlay = document.getElementById('loading-overlay');
+          if (overlay) overlay.style.display = 'none';
+        });
+    });
+  </script>
+</body>
 </html>
